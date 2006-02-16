@@ -14,5 +14,20 @@ if( $gBitSystem->isPackageActive( 'meta' ) ) {
 		'content_body_tpl' => 'bitpackage:meta/display_meta.tpl',
 		'content_edit_tab_tpl' => 'bitpackage:meta/assign_attribute_form.tpl'
 	) );
+	
+	global $gLibertySystem;
+	$pluginParams = array ( 'tag' => 'METASEARCH',
+		'auto_activate' => FALSE,
+		'requires_pair' => FALSE,
+		'load_function' => 'data_metasearch',
+		'title' => 'Meta Search',
+		'help_page' => 'MetaSearchPluginExample',
+		'description' => tra("This plugin performs a meta attribute search and displays the results."),
+		'help_function' => 'data_metasearch_help',
+		'syntax' => "{METASEARCH param=attribute:value,attribute:value,... }",
+		'plugin_type' => DATA_PLUGIN
+	);
+	$gLibertySystem->registerPlugin( PLUGIN_GUID_DATAMETASEARCH, $pluginParams );
+	$gLibertySystem->registerDataTag( $pluginParams['tag'], PLUGIN_GUID_DATAMETASEARCH );
 }
 ?>

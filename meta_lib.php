@@ -1,4 +1,5 @@
 <?php
+define( 'PLUGIN_GUID_DATAMETASEARCH', 'datametasearch' );
 
 // vim: set fdm=marker:
 
@@ -169,6 +170,73 @@ function meta_content_expunge( &$pContent, &$pParamHash ) { // {{{
 
 	$db->query( "DELETE FROM `meta_associations` WHERE `content_id` = ?", array( $pContent->mDb ) );
 
+} // }}}
+
+function data_metasearch_help() { // {{{
+	return 'N/A';
+} // }}}
+
+function data_metasearch($data, $params) { // {{{
+	global $gBitSystem;
+	if( !isset( $params['param'] ) )
+		return 'Missing parameter "param".';
+		
+	$p = explode( ',', $params['param'] );
+	$p = array_map( 'trim', $p );
+
+	$conditions = array();
+	
+	foreach( $p as $value ) {
+		list( $key, $value ) = explode( ':', $value );
+
+		if( $value == 'none' ) {
+			$conditions[] = "COUNT( IF( `attribute`.`name` = '$key', 'GOOD', NULL ) ) = 0";
+			continue;
+		}
+
+		$conditions[] = "COUNT( IF( `attribute`.`name` = '$key' AND `value`.`value` = '$value', 'GOOD', NULL ) ) > 0";
+	}
+
+	if( count( $conditions ) > 0 ) {
+
+		$query = "
+			SELECT
+				`content`.`content_id` as `id`,
+				`content`.`title`,
+				`content`.`last_modified`,
+				`user`.`real_name`
+			FROM
+				`meta_associations` as `meta`
+				INNER JOIN `meta_attributes` as `attribute` ON `meta`.`meta_attribute_id` = `attribute`.`meta_attribute_id`
+				INNER JOIN `meta_values` as `value` ON `meta`.`meta_value_id` = `value`.`meta_value_id`
+				INNER JOIN `liberty_content` as `content` ON `meta`.`content_id` = `content`.`content_id`
+				INNER JOIN `users_users` as `user` ON `user`.`user_id` = `content`.`user_id`
+			WHERE
+				`meta`.`end` IS NULL
+			GROUP BY
+				`meta`.`content_id`
+			HAVING
+				" . implode( ' AND ', $conditions ) . "
+			ORDER BY
+				`content`.`last_modified` DESC";
+
+		$result = $gBitSystem->mDb->query( $query );
+
+		$rows = $result->getRows();
+
+		$data = array();
+		foreach( $rows as $row ) {
+			$data[] = "[" . BIT_ROOT_URL 
+				. "/index.php?content_id={$row['id']}|{$row['title']}]|" 
+				. strftime( $gBitSystem->get_long_date_format(), $row['last_modified'] )
+				. "|" . $row['real_name'];
+		}
+
+		if( count( $data ) > 0 )
+			return '||' . implode( "\r\n", $data ) . '||';
+	}
+
+	return 'No results found.';
 } // }}}
 
 ?>
