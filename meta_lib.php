@@ -188,16 +188,21 @@ function data_metasearch($data, $params) { // {{{
 	$p = array_map( 'trim', $p );
 
 	$conditions = array();
+	$parameters = array();
 	
 	foreach( $p as $value ) {
 		list( $key, $value ) = explode( ':', $value );
 
+
 		if( $value == 'none' ) {
-			$conditions[] = "COUNT( IF( `attribute`.`name` = '$key', 'GOOD', NULL ) ) = 0";
+			$conditions[] = "COUNT( IF( `attribute`.`name` = ?, 'GOOD', NULL ) ) = 0";
+			$parameters[] = $key;
 			continue;
 		}
 
-		$conditions[] = "COUNT( IF( `attribute`.`name` = '$key' AND `value`.`value` = '$value', 'GOOD', NULL ) ) > 0";
+		$conditions[] = "COUNT( IF( `attribute`.`name` = ? AND `value`.`value` = ?, 'GOOD', NULL ) ) > 0";
+		$parameters[] = $key;
+		$parameters[] = $value;
 	}
 
 	if( count( $conditions ) > 0 ) {
@@ -223,7 +228,7 @@ function data_metasearch($data, $params) { // {{{
 			ORDER BY
 				`content`.`last_modified` DESC";
 
-		$result = $gBitSystem->mDb->query( $query );
+		$result = $gBitSystem->mDb->query( $query, $parameters );
 
 		$rows = $result->getRows();
 
