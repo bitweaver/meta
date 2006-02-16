@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_meta/index.php,v 1.1 2006/02/16 00:19:13 lphuberdeau Exp $
+// $Header: /cvsroot/bitweaver/_bit_meta/index.php,v 1.2 2006/02/16 23:22:55 lphuberdeau Exp $
 // Copyright (c) 2004 bitweaver Sample
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
@@ -14,7 +14,7 @@ $gBitSystem->verifyPackage( 'meta' );
 // Now check permissions to access this page
 $gBitSystem->verifyPermission( 'bit_p_view_meta' );
 
-$gBitSmarty->assign( 'attributes', meta_get_possible_values( $gBitSystem->mDb, 0, 1000 ) );
+$gBitSmarty->assign( 'attributes', meta_get_possible_values( $gBitSystem->mDb ) );
 
 if( isset( $_REQUEST['search'] ) ) {
 
@@ -34,8 +34,8 @@ if( isset( $_REQUEST['search'] ) ) {
 
 	if( count( $conditions ) > 0 ) {
 
-		if( $gBitSystem->isPackageActive( 'pigeonholes' ) ) {
-			$category = "LEFT JOIN `bit_pigeonhole_members` as `pigeon` ON `pigeon`.`content_id` = `content`.`content_id`";
+		if( $gBitSystem->isPackageActive( 'pigeonholes' ) && isset( $_POST['pigeonholes'] ) ) {
+			$category = "LEFT JOIN `pigeonhole_members` as `pigeon` ON `pigeon`.`content_id` = `content`.`content_id`";
 
 			$holes = array();
 			$p = $_POST['pigeonholes']['pigeonhole'];
@@ -65,7 +65,7 @@ if( isset( $_REQUEST['search'] ) ) {
 				`user`.`real_name`
 			FROM
 				`meta_associations` as `meta`
-				INNER JOIN `tiki_content` as `content` ON `meta`.`content_id` = `content`.`content_id`
+				INNER JOIN `liberty_content` as `content` ON `meta`.`content_id` = `content`.`content_id`
 				INNER JOIN `users_users` as `user` ON `user`.`user_id` = `content`.`user_id`
 				$category
 			WHERE
@@ -89,7 +89,7 @@ else
 	$gBitSmarty->assign( 'tab', 0 );
 
 if( $gBitSystem->isPackageActive( 'pigeonholes' ) )
-	pigeonholes_input_content();
+	pigeonholes_content_input();
 
 // Display the template
 $gBitSystem->display( 'bitpackage:meta/display_search.tpl', tra( 'Meta Search' ) );

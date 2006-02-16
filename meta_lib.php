@@ -135,6 +135,9 @@ function meta_content_store( &$pContent, &$pParamHash ) { // {{{
 
 	if( !$gBitUser->hasPermission( 'bit_p_assign_meta' ) )
 		return;
+	
+	if( !isset( $_REQUEST['metatt'] ) )
+		return;
 
 	$now = time();
 
