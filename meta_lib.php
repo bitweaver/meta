@@ -7,7 +7,7 @@ function meta_get_possible_values( $db, $content_id = null ) { // {{{
 
 	global $gBitUser;
 
-	$attributes = array();
+	$attributes = array( '' => array() );
 	$selected = array();
 
 	if( $content_id != null ) {
@@ -33,22 +33,34 @@ function meta_get_possible_values( $db, $content_id = null ) { // {{{
 		$att = $row['meta_attribute_id'];
 		$val = $row['meta_value_id'];
 
-		if( !isset( $attributes[$att] ) ) {
-			$attributes[$att] = array( 'name' => $row['name'], 'values' => array(
+		$parts = explode( ".", $row['name'] );
+		if( count( $parts ) == 1 )
+			array_unshift( $parts, '' );
+
+		list( $group, $name ) = $parts;
+
+		if( !isset( $attributes[$group] ) )
+			$attributes[$group] = array();
+
+		if( !isset( $attributes[$group][$att] ) ) {
+			$attributes[$group][$att] = array( 'name' => $name, 'values' => array(
 				array( 'id' => 'none', 'value' => tra( 'None' ), 'selected' => false ),
 			) );
 
 			if( $gBitUser->hasPermission( 'bit_p_edit_value_meta' ) )
-				$attributes[$att]['values'][] = array( 'id' => 'other', 'value' => tra( 'Other' ), 'selected' => false );
+				$attributes[$group][$att]['values'][] = array( 'id' => 'other', 'value' => tra( 'Other' ), 'selected' => false );
 		}
 
 		if( !empty( $val ) )
-			$attributes[$att]['values'][] = array( 
+			$attributes[$group][$att]['values'][] = array( 
 				'id' => $val, 
 				'value' => $row['value'], 
 				'selected' => isset( $selected[$att] ) && $val == $selected[$att]
 			);
 	}
+
+	if( count( $attributes[''] ) == 0 )
+		array_shift( $attributes );
 
 	return $attributes;
 } // }}}
@@ -71,7 +83,26 @@ function meta_content_display( &$pContent, &$pParamHash ) { // {{{
 		AND `meta_associations`.`end` IS NULL"
 	, array( $pContent->mContentId ) );
 
-	$gBitSmarty->assign( 'metaInfo', $result->getRows() );
+
+	$metaInfo = array( '' => array() );
+
+	foreach( $result->getRows() as $row ) {
+		$parts = explode( ".", $row['name'] );
+		if( count( $parts ) == 1 )
+			array_unshift( $parts, '' );
+
+		list( $group, $name ) = $parts;
+
+		if( !isset( $metaInfo[$group] ) )
+			$metaInfo[$group] = array();
+
+		$metaInfo[$group][] = array( 'name' => $name, 'value' => $row['value'] );
+	}
+
+	if( count( $metaInfo[''] ) == 0 )
+		array_shift( $metaInfo );
+
+	$gBitSmarty->assign( 'metaInfo', $metaInfo );
 } // }}}
 
 function meta_content_edit( &$pContent, &$pParamHash ) { // {{{
@@ -118,9 +149,10 @@ function meta_content_preview( &$pContent, &$pParamHash ) { // {{{
 
 	foreach( $_REQUEST['metatt'] as $att_id => $value ) {
 
-		foreach( $attributes[$att_id]['values'] as $index => $row )
-			if( $row['id'] == $value )
-				$attributes[$att_id]['values'][$index]['selected'] = true;
+		foreach( $attributes as $group => $values )
+			foreach( $values as $index => $row )
+				if( $row['id'] == $value )
+					$attributes[$group][$att_id]['values'][$index]['selected'] = true;
 	}
 
 	$gBitSmarty->assign( 'metaAttributes', $attributes );
