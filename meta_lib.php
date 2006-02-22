@@ -3,7 +3,7 @@ define( 'PLUGIN_GUID_DATAMETASEARCH', 'datametasearch' );
 
 // vim: set fdm=marker:
 
-function meta_get_possible_values( $db, $content_id = null ) { // {{{
+function meta_get_possible_values( $db, $content_id = null, $other = true ) { // {{{
 
 	global $gBitUser;
 
@@ -47,7 +47,7 @@ function meta_get_possible_values( $db, $content_id = null ) { // {{{
 				array( 'id' => 'none', 'value' => tra( 'None' ), 'selected' => false ),
 			) );
 
-			if( $gBitUser->hasPermission( 'bit_p_edit_value_meta' ) )
+			if( $other && $gBitUser->hasPermission( 'bit_p_edit_value_meta' ) )
 				$attributes[$group][$att]['values'][] = array( 'id' => 'other', 'value' => tra( 'Other' ), 'selected' => false );
 		}
 

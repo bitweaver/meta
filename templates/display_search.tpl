@@ -5,19 +5,22 @@
 {form ipackage="meta" ifile="index.php"}
 	{jstabs tab="`$tab`"}
 		{jstab title="Search"}
-			{foreach from=$attributes key=attribute_id item=data}
-			<div class="row">
-				{formlabel label="`$data.name`" for="`$attribute_id`"}
-				{forminput}
-					<select name="metatt[{$attribute_id}]">
-						<option value="any">{tr}Any value{/tr}</option>
-						<option value="none">{tr}No value{/tr}</option>
-						{foreach from=$data.values key=key item=value}
-						<option value="{$value.id}">{$value.value}</option>
-						{/foreach}
-					</select>
-				{/forminput}
-			</div>
+			{foreach from=$metaAttributes key=group item=attributes}
+				{if !($group eq '')}
+					<h2>{$group}</h2>
+				{/if}
+				{foreach from=$attributes key=attribute_id item=data}
+				<div class="row">
+					{formlabel label="`$data.name`" for="`$attribute_id`"}
+					{forminput}
+						<select name="metatt[{$attribute_id}]">
+							{foreach from=$data.values key=key item=value}
+							<option value="{$value.id}">{$value.value}</option>
+							{/foreach}
+						</select>
+					{/forminput}
+				</div>
+				{/foreach}
 			{foreachelse}
 			<p>
 			{tr}No attributes defined.{/tr}
