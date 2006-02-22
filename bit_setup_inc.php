@@ -1,6 +1,12 @@
 <?php
 global $gBitSystem;
-$gBitSystem->registerPackage( 'meta', dirname(__FILE__).'/', true, LIBERTY_SERVICE_METADATA );
+$registerHash = array(
+	'package_name' => 'meta',
+	'package_path' => dirname( __FILE__ ).'/',
+	'activatable' => true,
+	'service' => LIBERTY_SERVICE_METADATA
+);
+$gBitSystem->registerPackage( $registerHash );
 
 if( $gBitSystem->isPackageActive( 'meta' ) ) {
 	require_once "meta_lib.php";
