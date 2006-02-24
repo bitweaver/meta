@@ -1,7 +1,20 @@
 <?php
 define( 'PLUGIN_GUID_DATAMETASEARCH', 'datametasearch' );
+define( 'PLUGIN_GUID_METADATA', 'datametadata' );
 
 // vim: set fdm=marker:
+function meta_placeholder_present() { // {{{
+	global $gBitSystem;
+	$gBitSystem->loadLayout();
+
+	foreach( $gBitSystem->mLayout as $col )
+		if( is_array( $col ) )
+			foreach( $col as $elem )
+				if( $elem['module_rsrc'] == 'bitpackage:meta/mod_meta_placeholder.tpl' )
+					return true;
+					
+	return false;
+} // }}}
 
 function meta_get_possible_values( $db, $content_id = null, $other = true ) { // {{{
 
@@ -68,6 +81,7 @@ function meta_get_possible_values( $db, $content_id = null, $other = true ) { //
 function meta_content_display( &$pContent, &$pParamHash ) { // {{{
 	global $gBitSystem;
 	global $gBitSmarty;
+	global $metaTables;
 	$result = $gBitSystem->mDb->query( "
 	SELECT 
 		`meta_attributes`.`name`, 
@@ -102,7 +116,10 @@ function meta_content_display( &$pContent, &$pParamHash ) { // {{{
 	if( count( $metaInfo[''] ) == 0 )
 		array_shift( $metaInfo );
 
-	$gBitSmarty->assign( 'metaInfo', $metaInfo );
+	if( meta_placeholder_present() && count( $metaInfo ) )
+		$metaTables[tra( "Attributes" )] = $metaInfo;
+	else
+		$gBitSmarty->assign( 'metaInfo', $metaInfo );
 } // }}}
 
 function meta_content_edit( &$pContent, &$pParamHash ) { // {{{
@@ -148,11 +165,13 @@ function meta_content_preview( &$pContent, &$pParamHash ) { // {{{
 	$attributes = meta_get_possible_values( $db );
 
 	foreach( $_REQUEST['metatt'] as $att_id => $value ) {
-
-		foreach( $attributes as $group => $values )
-			foreach( $values as $index => $row )
-				if( $row['id'] == $value )
-					$attributes[$group][$att_id]['values'][$index]['selected'] = true;
+		foreach( $attributes as $group => $values ) {
+			if( isset( $values[$att_id] ) )
+				foreach( $values[$att_id]['values'] as $index => $row ) {
+					if( $row['id'] == $value )
+						$attributes[$group][$att_id]['values'][$index]['selected'] = true;
+				}
+		}
 	}
 
 	$gBitSmarty->assign( 'metaAttributes', $attributes );
@@ -277,6 +296,54 @@ function data_metasearch($data, $params) { // {{{
 	}
 
 	return 'No results found.';
+} // }}}
+
+function data_metadata_help() { // {{{
+	return 'N/A';
+} // }}}
+
+function data_metadata( $data, $params ) { // {{{
+	extract ($params, EXTR_SKIP);
+
+	
+	global $gContent;
+
+	if( !meta_placeholder_present() )
+		return tra( "Could not display meta data: mod_meta_placeholder not found." );
+
+	if( !isset( $title ) )
+		return tra( "No title set." );
+	
+	$data = explode( "\n", $data );
+	$categ = '';
+
+	foreach( $data as $row ) {
+		$row = explode( ':', $row, 2 );
+		$row = array_map( 'trim', $row );
+
+		switch( count( $row ) ) {
+		case 1:
+			if( !empty( $row[0] ) )
+				$categ = $row[0];
+			break;
+		case 2:
+			meta_add_pair( $title, $row[0], $gContent->parseData( $row[1] ), $categ );
+			break;
+		}
+	}
+	
+    return ' ';
+} // }}}
+
+function meta_add_pair( $table, $name, $value, $section = '' ) { // {{{
+	global $metaTables;
+
+	if( !isset( $metaTables[$table] ) )
+		$metaTables[$table] = array( '' => array() );
+	if( !isset( $metaTables[$table][$section] ) )
+		$metaTables[$table][$section] = array();
+
+	$metaTables[$table][$section][] = array( 'name' => $name, 'value' => $value );
 } // }}}
 
 ?>
