@@ -46,7 +46,7 @@ function meta_get_possible_values( $db, $content_id = null, $other = true ) { //
 		$att = $row['meta_attribute_id'];
 		$val = $row['meta_value_id'];
 
-		$parts = explode( ".", $row['name'] );
+		$parts = explode( ".", $row['name'], 2 );
 		if( count( $parts ) == 1 )
 			array_unshift( $parts, '' );
 
