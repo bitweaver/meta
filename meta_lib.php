@@ -242,18 +242,31 @@ function data_metasearch($data, $params) { // {{{
 	$parameters = array();
 	
 	foreach( $p as $value ) {
-		list( $key, $value ) = explode( ':', $value );
+		list( $key, $values ) = explode( ':', $value );
+		$values = explode( '|', $values );
 
+		$temp = array();
 
-		if( $value == 'none' ) {
-			$conditions[] = "COUNT( IF( `attribute`.`name` = ?, 'GOOD', NULL ) ) = 0";
+		foreach( $values as $value ) {
+			if( $value == 'none' ) {
+				$temp[] = "COUNT( IF( `attribute`.`name` = ?, 'GOOD', NULL ) ) = 0";
+				$parameters[] = $key;
+				continue;
+			}
+
+			if( $value == 'any' ) {
+				$temp[] = "COUNT( IF( `attribute`.`name` LIKE ?, 'GOOD', NULL ) ) > 0";
+				$parameters[] = $key;
+				continue;
+			}
+
+			$temp[] = "COUNT( IF( `attribute`.`name` = ? AND `value`.`value` = ?, 'GOOD', NULL ) ) > 0";
 			$parameters[] = $key;
-			continue;
+			$parameters[] = $value;
 		}
 
-		$conditions[] = "COUNT( IF( `attribute`.`name` = ? AND `value`.`value` = ?, 'GOOD', NULL ) ) > 0";
-		$parameters[] = $key;
-		$parameters[] = $value;
+		if( count( $temp ) > 0 )
+			$conditions[] = "( " . implode( ' OR ', $temp ) . " )";
 	}
 
 	if( count( $conditions ) > 0 ) {
