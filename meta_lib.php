@@ -222,7 +222,7 @@ function meta_content_expunge( &$pContent, &$pParamHash ) { // {{{
 	global $gBitUser;
 	$db = $gBitSystem->mDb;
 
-	$db->query( "DELETE FROM `meta_associations` WHERE `content_id` = ?", array( $pContent->mDb ) );
+	$db->query( "DELETE FROM `meta_associations` WHERE `content_id` = ?", array( $pParamHash->mContentId ) );
 
 } // }}}
 
