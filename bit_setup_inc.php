@@ -4,7 +4,8 @@ $registerHash = array(
 	'package_name' => 'meta',
 	'package_path' => dirname( __FILE__ ).'/',
 	'activatable' => true,
-	'service' => LIBERTY_SERVICE_METADATA
+	'service' => LIBERTY_SERVICE_METADATA,
+	'homeable'=> TRUE
 );
 $gBitSystem->registerPackage( $registerHash );
 
