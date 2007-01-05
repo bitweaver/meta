@@ -42,7 +42,7 @@
 				</tr>
 				{foreach from=$searchData key=k item=res}
 				<tr>
-					<td><a href="{$smarty.const.BIT_ROOT_URL}?content_id={$res.id}">{$res.title}</a></td>
+					<td><a href="{$smarty.const.BIT_ROOT_URL}?content_id={$res.id}">{$res.title|escape}</a></td>
 					<td>{$res.last_modified|bit_long_date}</td>
 					<td>{$res.real_name}</td>
 				</tr>
