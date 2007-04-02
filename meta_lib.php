@@ -4,10 +4,10 @@ define( 'PLUGIN_GUID_METADATA', 'datametadata' );
 
 // vim: set fdm=marker:
 function meta_placeholder_present() { // {{{
-	global $gBitSystem;
-	$gBitSystem->loadLayout();
+	global $gBitThemes;
+	$gBitThemes->loadLayout();
 
-	foreach( $gBitSystem->mLayout as $col )
+	foreach( $gBitThemes->mLayout as $col )
 		if( is_array( $col ) )
 			foreach( $col as $elem )
 				if( $elem['module_rsrc'] == 'bitpackage:meta/mod_meta_placeholder.tpl' )
