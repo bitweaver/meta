@@ -10,14 +10,14 @@
 		<div class="row">
 			{formlabel label="`$data.name`" for="`$attribute_id`"}
 			{forminput}
-				<select name="metatt[{$attribute_id}]">
+				<select name="metatt[{$attribute_id}]" id="metattmenu">
 					{foreach from=$data.values key=key item=value}
 					<option value="{$value.id}"{if $value.selected > 0} selected="selected"{/if}>{$value.value}</option>
 					{/foreach}
 				</select>
 				
 				{if $gBitUser->hasPermission( 'p_edit_value_meta' )}
-					<input type="text" name="metatt_other[{$attribute_id}]" value="{$metaAttributesOther[$attribute_id]}"/>
+					<input type="text" name="metatt_other[{$attribute_id}]" value="{$metaAttributesOther[$attribute_id]}" onkeyup=""/>
 				{/if}
 			{/forminput}
 		</div>

@@ -180,11 +180,9 @@ function meta_content_preview( &$pContent, &$pParamHash ) { // {{{
 } // }}}
 
 function meta_content_store( &$pContent, &$pParamHash ) { // {{{
-	global $gBitSystem;
-	global $gBitUser;
-	$db = $gBitSystem->mDb;
+	global $gBitSystem, $gBitUser, $gBitDb;
 
-	if( !$gBitUser->hasPermission( 'p_assign_meta' ) )
+	if( !$pContent->hasUserPermission( 'p_assign_meta' ) )
 		return;
 	
 	if( !isset( $_REQUEST['metatt'] ) )
@@ -192,26 +190,23 @@ function meta_content_store( &$pContent, &$pParamHash ) { // {{{
 
 	$now = time();
 
-	$result = $db->query( "SELECT `meta_attribute_id`, `meta_value_id` FROM `meta_associations` WHERE `end` IS NULL AND `content_id` = ?", array( $pContent->mContentId ) );
+	$selected = $gBitDb->getAssoc( "SELECT `meta_attribute_id`, `meta_value_id` FROM `meta_associations` WHERE `end` IS NULL AND `content_id` = ?", array( $pContent->mContentId ) );
 
-	$selected = array();
-	foreach( $result->getRows() as $row )
-		$selected[ $row['meta_attribute_id'] ] = $row['meta_value_id'];
-	
 	foreach( $_REQUEST['metatt'] as $att_id => $value ) {
 
-		if( $value == 'other' )
-			$value = meta_get_value_id( $db, $_REQUEST['metatt_other'][$att_id] );
+		if( !empty( $_REQUEST['metatt_other'][$att_id] ) ) {
+			$value = meta_get_value_id( $gBitDb, $_REQUEST['metatt_other'][$att_id] );
+		}
 
 		if( $value == 'none' && isset( $selected[$att_id] ) ) {
-			$db->query( "UPDATE `meta_associations` SET `end` = ? WHERE `content_id` = ? AND `meta_attribute_id` = ?", array( $now, $pContent->mContentId, $att_id ) );
+			$gBitDb->query( "UPDATE `meta_associations` SET `end` = ? WHERE `content_id` = ? AND `meta_attribute_id` = ?", array( $now, $pContent->mContentId, $att_id ) );
 		}
 		elseif( !isset( $selected[$att_id] ) && $value != 'none' ) {
-			$db->query( "INSERT INTO `meta_associations` ( `content_id`, `meta_attribute_id`, `meta_value_id`, `user_id`, `start` ) VALUES( ?, ?, ?, ?, ? )", array( $pContent->mContentId, $att_id, $value, $gBitUser->mUserId, $now ) );
+			$gBitDb->query( "INSERT INTO `meta_associations` ( `content_id`, `meta_attribute_id`, `meta_value_id`, `user_id`, `start` ) VALUES( ?, ?, ?, ?, ? )", array( $pContent->mContentId, $att_id, $value, $gBitUser->mUserId, $now ) );
 		}
 		elseif( isset( $selected[$att_id]) && $value != $selected[$att_id] ) {
-			$db->query( "UPDATE `meta_associations` SET `end` = ? WHERE `content_id` = ? AND `meta_attribute_id` = ?", array( $now, $pContent->mContentId, $att_id ) );
-			$db->query( "INSERT INTO `meta_associations` ( `content_id`, `meta_attribute_id`, `meta_value_id`, `user_id`, `start` ) VALUES( ?, ?, ?, ?, ? )", array( $pContent->mContentId, $att_id, $value, $gBitUser->mUserId, $now ) );
+			$gBitDb->query( "UPDATE `meta_associations` SET `end` = ? WHERE `content_id` = ? AND `meta_attribute_id` = ?", array( $now, $pContent->mContentId, $att_id ) );
+			$gBitDb->query( "INSERT INTO `meta_associations` ( `content_id`, `meta_attribute_id`, `meta_value_id`, `user_id`, `start` ) VALUES( ?, ?, ?, ?, ? )", array( $pContent->mContentId, $att_id, $value, $gBitUser->mUserId, $now ) );
 		}
 	}
 
