@@ -60,7 +60,7 @@ function meta_get_possible_values( $db, $content_id = null, $other = true ) { //
 				array( 'id' => 'none', 'value' => tra( 'None' ), 'selected' => false ),
 			) );
 
-			if( $other && $gBitUser->hasPermission( 'bit_p_edit_value_meta' ) )
+			if( $other && $gBitUser->hasPermission( 'p_edit_value_meta' ) )
 				$attributes[$group][$att]['values'][] = array( 'id' => 'other', 'value' => tra( 'Other' ), 'selected' => false );
 		}
 
@@ -141,7 +141,7 @@ function meta_get_value_id( $db, $value ) { // {{{
 		return $result[0]['meta_value_id'];
 	else
 	{
-		if( $gBitUser->hasPermission( 'bit_p_edit_value_meta' ) ) {
+		if( $gBitUser->hasPermission( 'p_edit_value_meta' ) ) {
 			$id = $db->genID( 'meta_value_id_seq' );
 
 			$db->query( "INSERT INTO `meta_values` (`meta_value_id`, `value`) VALUES( ?, ? )", array( $id, $value ) );
@@ -159,7 +159,7 @@ function meta_content_preview( &$pContent, &$pParamHash ) { // {{{
 	global $gBitSmarty;
 	$db = $gBitSystem->mDb;
 
-	if( !$gBitUser->hasPermission( 'bit_p_assign_meta' ) )
+	if( !$gBitUser->hasPermission( 'p_assign_meta' ) )
 		return;
 
 	$attributes = meta_get_possible_values( $db );
@@ -184,7 +184,7 @@ function meta_content_store( &$pContent, &$pParamHash ) { // {{{
 	global $gBitUser;
 	$db = $gBitSystem->mDb;
 
-	if( !$gBitUser->hasPermission( 'bit_p_assign_meta' ) )
+	if( !$gBitUser->hasPermission( 'p_assign_meta' ) )
 		return;
 	
 	if( !isset( $_REQUEST['metatt'] ) )

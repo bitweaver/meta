@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_meta/edit_attributes.php,v 1.1 2006/02/16 00:19:13 lphuberdeau Exp $
+// $Header: /cvsroot/bitweaver/_bit_meta/edit_attributes.php,v 1.2 2007/10/23 16:27:00 spiderr Exp $
 // Copyright (c) 2004 bitweaver Sample
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
@@ -11,7 +11,7 @@ require_once( '../bit_setup_inc.php' );
 $gBitSystem->verifyPackage( 'meta' );
 
 // Now check permissions to access this page
-$gBitSystem->verifyPermission( 'bit_p_edit_attributes_meta' );
+$gBitSystem->verifyPermission( 'p_edit_attributes_meta' );
 
 if( isset( $_REQUEST['id'] ) ) {
 	$result = $gBitSystem->mDb->query( "SELECT `name` FROM `meta_attributes` WHERE `meta_attribute_id` = ?", array( $_REQUEST['id'] ) );

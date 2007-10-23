@@ -10,6 +10,7 @@ $registerHash = array(
 $gBitSystem->registerPackage( $registerHash );
 
 if( $gBitSystem->isPackageActive( 'meta' ) ) {
+	define( 'META_PKG_TITLE', ucfirst( strtolower( META_PKG_DIR ) ) );
 	require_once "meta_lib.php";
 
 	$gLibertySystem->registerService( LIBERTY_SERVICE_METADATA, META_PKG_NAME, array(

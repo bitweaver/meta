@@ -1,6 +1,6 @@
-{if $gBitUser->hasPermission( 'bit_p_assign_meta' )}
-{jstab title="Meta Attributes"}
-	<h1>{tr}Meta Attributes{/tr}</h1>
+{if $gBitUser->hasPermission( 'p_assign_meta' )}
+{jstab title=$smarty.const.META_PKG_TITLE}
+	{legend legend="`$smarty.const.META_PKG_TITLE` Assignments"}
 
 	{foreach from=$metaAttributes key=group item=attributes}
 		{if !($group eq '')}
@@ -16,7 +16,7 @@
 					{/foreach}
 				</select>
 				
-				{if $gBitUser->hasPermission( 'bit_p_edit_value_meta' )}
+				{if $gBitUser->hasPermission( 'p_edit_value_meta' )}
 					<input type="text" name="metatt_other[{$attribute_id}]" value="{$metaAttributesOther[$attribute_id]}"/>
 				{/if}
 			{/forminput}
@@ -27,10 +27,10 @@
 	{tr}No attributes defined.{/tr}
 	</p>
 	{/foreach}
-	{if $gBitUser->hasPermission( 'bit_p_edit_attribute_meta' )}
-	<p>
-	<a href="{$smarty.const.META_PKG_URL}edit_attributes.php">{tr}Manage Attributes{/tr}</a>
-	</p>
+	{if $gBitUser->hasPermission( 'p_edit_attribute_meta' )}
+		<p> <a href="{$smarty.const.META_PKG_URL}edit_attributes.php">{tr}Manage {$smarty.const.META_PKG_TITLE} Options{/tr}</a> </p>
 	{/if}
+	
+	{/legend}
 {/jstab}
 {/if}

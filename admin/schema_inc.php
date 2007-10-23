@@ -61,10 +61,10 @@ $gBitInstaller->registerSchemaDefault( META_PKG_NAME, array(
 
 // ### Default UserPermissions
 $gBitInstaller->registerUserPermissions( META_PKG_NAME, array(
-	array( 'bit_p_edit_attribute_meta', 'Can modify the list of valid attributes', 'editors', META_PKG_NAME ),
-	array( 'bit_p_edit_value_meta', 'Can create new value', 'registered', META_PKG_NAME ),
-	array( 'bit_p_assign_meta', 'Can assign meta values to content', 'registered', META_PKG_NAME ),
-	array( 'bit_p_view_meta', 'Can view meta attributes and values', 'basic', META_PKG_NAME )
+	array( 'p_edit_attribute_meta', 'Can modify the list of valid attributes', 'editors', META_PKG_NAME ),
+	array( 'p_edit_value_meta', 'Can create new value', 'registered', META_PKG_NAME ),
+	array( 'p_assign_meta', 'Can assign meta values to content', 'registered', META_PKG_NAME ),
+	array( 'p_view_meta', 'Can view meta attributes and values', 'basic', META_PKG_NAME )
 ) );
 
 // ### Default Preferences
