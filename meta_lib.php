@@ -24,7 +24,7 @@ function meta_get_possible_values( $db, $content_id = null, $other = true ) { //
 	$selected = array();
 
 	if( $content_id != null ) {
-		$result = $db->query( "SELECT `meta_attribute_id`, `meta_value_id` FROM `meta_associations` WHERE `end` IS NULL AND `content_id` = ?", array( $content_id ) );
+		$result = $db->query( "SELECT `meta_attribute_id`, `meta_value_id` FROM `".BIT_DB_PREFIX."meta_associations` WHERE `end` IS NULL AND `content_id` = ?", array( $content_id ) );
 
 		foreach( $result->getRows() as $row )
 			$selected[ $row['meta_attribute_id'] ] = $row['meta_value_id'];
@@ -37,9 +37,9 @@ function meta_get_possible_values( $db, $content_id = null, $other = true ) { //
 		`val`.`meta_value_id`,
 		`value`
 	FROM 
-		`meta_attributes` as `att`
-		LEFT JOIN `meta_associations` as `asso` ON `asso`.`meta_attribute_id` = `att`.`meta_attribute_id`
-		LEFT JOIN `meta_values` as `val` ON `asso`.`meta_value_id` = `val`.`meta_value_id`
+		`".BIT_DB_PREFIX."meta_attributes` as `att`
+		LEFT JOIN `".BIT_DB_PREFIX."meta_associations` as `asso` ON `asso`.`meta_attribute_id` = `att`.`meta_attribute_id`
+		LEFT JOIN `".BIT_DB_PREFIX."meta_values` as `val` ON `asso`.`meta_value_id` = `val`.`meta_value_id`
 	ORDER BY `name`, `value`" );
 
 	foreach( $result->getRows() as $row ) {
@@ -84,17 +84,17 @@ function meta_content_display( &$pContent, &$pParamHash ) { // {{{
 	global $metaTables;
 	$result = $gBitSystem->mDb->query( "
 	SELECT 
-		`meta_attributes`.`name`, 
-		`meta_values`.`value` 
+		`".BIT_DB_PREFIX."meta_attributes`.`name`, 
+		`".BIT_DB_PREFIX."meta_values`.`value` 
 	FROM 
-		`meta_associations` 
-		INNER JOIN `meta_attributes` ON 
-			`meta_associations`.`meta_attribute_id` = `meta_attributes`.`meta_attribute_id` 
-		INNER JOIN `meta_values` ON
-			`meta_associations`.`meta_value_id` = `meta_values`.`meta_value_id` 
+		`".BIT_DB_PREFIX."meta_associations` 
+		INNER JOIN `".BIT_DB_PREFIX."meta_attributes` ON 
+			`".BIT_DB_PREFIX."meta_associations`.`meta_attribute_id` = `".BIT_DB_PREFIX."meta_attributes`.`meta_attribute_id` 
+		INNER JOIN `".BIT_DB_PREFIX."meta_values` ON
+			`".BIT_DB_PREFIX."meta_associations`.`meta_value_id` = `".BIT_DB_PREFIX."meta_values`.`meta_value_id` 
 	WHERE 
-		`meta_associations`.`content_id` = ? 
-		AND `meta_associations`.`end` IS NULL"
+		`".BIT_DB_PREFIX."meta_associations`.`content_id` = ? 
+		AND `".BIT_DB_PREFIX."meta_associations`.`end` IS NULL"
 	, array( $pContent->mContentId ) );
 
 
@@ -133,7 +133,7 @@ function meta_get_value_id( $db, $value ) { // {{{
 
 	global $gBitUser;
 
-	$result = $db->query( "SELECT `meta_value_id` FROM `meta_values` WHERE `value` LIKE ?", array( $value ) );
+	$result = $db->query( "SELECT `meta_value_id` FROM `".BIT_DB_PREFIX."meta_values` WHERE `value` LIKE ?", array( $value ) );
 
 	$result = $result->getRows();
 
@@ -144,7 +144,7 @@ function meta_get_value_id( $db, $value ) { // {{{
 		if( $gBitUser->hasPermission( 'p_edit_value_meta' ) ) {
 			$id = $db->genID( 'meta_value_id_seq' );
 
-			$db->query( "INSERT INTO `meta_values` (`meta_value_id`, `value`) VALUES( ?, ? )", array( $id, $value ) );
+			$db->query( "INSERT INTO `".BIT_DB_PREFIX."meta_values` (`meta_value_id`, `value`) VALUES( ?, ? )", array( $id, $value ) );
 
 			return $id;
 		}
@@ -190,7 +190,7 @@ function meta_content_store( &$pContent, &$pParamHash ) { // {{{
 
 	$now = time();
 
-	$selected = $gBitDb->getAssoc( "SELECT `meta_attribute_id`, `meta_value_id` FROM `meta_associations` WHERE `end` IS NULL AND `content_id` = ?", array( $pContent->mContentId ) );
+	$selected = $gBitDb->getAssoc( "SELECT `meta_attribute_id`, `meta_value_id` FROM `".BIT_DB_PREFIX."meta_associations` WHERE `end` IS NULL AND `content_id` = ?", array( $pContent->mContentId ) );
 
 	foreach( $_REQUEST['metatt'] as $att_id => $value ) {
 
@@ -199,14 +199,14 @@ function meta_content_store( &$pContent, &$pParamHash ) { // {{{
 		}
 
 		if( $value == 'none' && isset( $selected[$att_id] ) ) {
-			$gBitDb->query( "UPDATE `meta_associations` SET `end` = ? WHERE `content_id` = ? AND `meta_attribute_id` = ?", array( $now, $pContent->mContentId, $att_id ) );
+			$gBitDb->query( "UPDATE `".BIT_DB_PREFIX."meta_associations` SET `end` = ? WHERE `content_id` = ? AND `meta_attribute_id` = ?", array( $now, $pContent->mContentId, $att_id ) );
 		}
 		elseif( !isset( $selected[$att_id] ) && $value != 'none' ) {
-			$gBitDb->query( "INSERT INTO `meta_associations` ( `content_id`, `meta_attribute_id`, `meta_value_id`, `user_id`, `start` ) VALUES( ?, ?, ?, ?, ? )", array( $pContent->mContentId, $att_id, $value, $gBitUser->mUserId, $now ) );
+			$gBitDb->query( "INSERT INTO `".BIT_DB_PREFIX."meta_associations` ( `content_id`, `meta_attribute_id`, `meta_value_id`, `user_id`, `start` ) VALUES( ?, ?, ?, ?, ? )", array( $pContent->mContentId, $att_id, $value, $gBitUser->mUserId, $now ) );
 		}
 		elseif( isset( $selected[$att_id]) && $value != $selected[$att_id] ) {
-			$gBitDb->query( "UPDATE `meta_associations` SET `end` = ? WHERE `content_id` = ? AND `meta_attribute_id` = ?", array( $now, $pContent->mContentId, $att_id ) );
-			$gBitDb->query( "INSERT INTO `meta_associations` ( `content_id`, `meta_attribute_id`, `meta_value_id`, `user_id`, `start` ) VALUES( ?, ?, ?, ?, ? )", array( $pContent->mContentId, $att_id, $value, $gBitUser->mUserId, $now ) );
+			$gBitDb->query( "UPDATE `".BIT_DB_PREFIX."meta_associations` SET `end` = ? WHERE `content_id` = ? AND `meta_attribute_id` = ?", array( $now, $pContent->mContentId, $att_id ) );
+			$gBitDb->query( "INSERT INTO `".BIT_DB_PREFIX."meta_associations` ( `content_id`, `meta_attribute_id`, `meta_value_id`, `user_id`, `start` ) VALUES( ?, ?, ?, ?, ? )", array( $pContent->mContentId, $att_id, $value, $gBitUser->mUserId, $now ) );
 		}
 	}
 
@@ -217,7 +217,7 @@ function meta_content_expunge( &$pContent, &$pParamHash ) { // {{{
 	global $gBitUser;
 	$db = $gBitSystem->mDb;
 
-	$db->query( "DELETE FROM `meta_associations` WHERE `content_id` = ?", array( $pParamHash->mContentId ) );
+	$db->query( "DELETE FROM `".BIT_DB_PREFIX."meta_associations` WHERE `content_id` = ?", array( $pParamHash->mContentId ) );
 
 } // }}}
 
@@ -273,11 +273,11 @@ function data_metasearch($data, $params) { // {{{
 				`content`.`last_modified`,
 				`user`.`real_name`
 			FROM
-				`meta_associations` as `meta`
-				INNER JOIN `meta_attributes` as `attribute` ON `meta`.`meta_attribute_id` = `attribute`.`meta_attribute_id`
-				INNER JOIN `meta_values` as `value` ON `meta`.`meta_value_id` = `value`.`meta_value_id`
-				INNER JOIN `liberty_content` as `content` ON `meta`.`content_id` = `content`.`content_id`
-				INNER JOIN `users_users` as `user` ON `user`.`user_id` = `content`.`user_id`
+				`".BIT_DB_PREFIX."meta_associations` as `meta`
+				INNER JOIN `".BIT_DB_PREFIX."meta_attributes` as `attribute` ON `meta`.`meta_attribute_id` = `attribute`.`meta_attribute_id`
+				INNER JOIN `".BIT_DB_PREFIX."meta_values` as `value` ON `meta`.`meta_value_id` = `value`.`meta_value_id`
+				INNER JOIN `".BIT_DB_PREFIX."liberty_content` as `content` ON `meta`.`content_id` = `content`.`content_id`
+				INNER JOIN `".BIT_DB_PREFIX."users_users` as `user` ON `user`.`user_id` = `content`.`user_id`
 			WHERE
 				`meta`.`end` IS NULL
 			GROUP BY

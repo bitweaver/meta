@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_meta/index.php,v 1.4 2007/10/23 16:27:00 spiderr Exp $
+// $Header: /cvsroot/bitweaver/_bit_meta/index.php,v 1.5 2007/11/17 22:02:38 joasch Exp $
 // Copyright (c) 2004 bitweaver Sample
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
@@ -41,9 +41,9 @@ if( isset( $_REQUEST['search'] ) ) {
 				`content`.`last_modified`,
 				`user`.`real_name`
 			FROM
-				`meta_associations` as `meta`
-				INNER JOIN `liberty_content` as `content` ON `meta`.`content_id` = `content`.`content_id`
-				INNER JOIN `users_users` as `user` ON `user`.`user_id` = `content`.`user_id`
+				`".BIT_DB_PREFIX."meta_associations` as `meta`
+				INNER JOIN `".BIT_DB_PREFIX."liberty_content` as `content` ON `meta`.`content_id` = `content`.`content_id`
+				INNER JOIN `".BIT_DB_PREFIX."users_users` as `user` ON `user`.`user_id` = `content`.`user_id`
 			WHERE
 				`meta`.`end` IS NULL
 			GROUP BY
