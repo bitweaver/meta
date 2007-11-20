@@ -129,27 +129,24 @@ function meta_content_edit( &$pContent, &$pParamHash ) { // {{{
 } // }}} 
 
 function meta_get_value_id( $value ) { // {{{ 
-
 	global $gBitUser, $gBitDb;
+
+	$ret = 0;
 
 	$result = $gBitDb->query( "SELECT `meta_value_id` FROM `".BIT_DB_PREFIX."meta_values` WHERE `value` LIKE ?", array( $value ) );
 
 	$result = $result->getRows();
 
-	if( count( $result ) > 0 )
-		return $result[0]['meta_value_id'];
-	else
-	{
-		if( $gBitUser->hasPermission( 'p_edit_value_meta' ) ) {
+	if( count( $result ) > 0 ) {
+		$ret = $result[0]['meta_value_id'];
+	} else {
+		if( $gBitUser->hasPermission( 'p_edit_value_meta' ) && !empty( $value ) ) {
 			$id = $gBitDb->genID( 'meta_value_id_seq' );
-
 			$gBitDb->query( "INSERT INTO `".BIT_DB_PREFIX."meta_values` (`meta_value_id`, `value`) VALUES( ?, ? )", array( $id, $value ) );
-
-			return $id;
+			$ret = $id;
 		}
-		else
-			return 0;
 	}
+	return $ret;
 } // }}} 
 
 function meta_content_preview( &$pContent, &$pParamHash ) { // {{{ 
@@ -198,11 +195,9 @@ print " $att_id => $value\n";
 
 		if( $value == 'none' && isset( $selected[$att_id] ) ) {
 			$gBitDb->query( "UPDATE `".BIT_DB_PREFIX."meta_associations` SET `end` = ? WHERE `content_id` = ? AND `meta_attribute_id` = ?", array( $now, $pContent->mContentId, $att_id ) );
-		}
-		elseif( !isset( $selected[$att_id] ) && $value != 'none' ) {
+		} elseif( !isset( $selected[$att_id] ) && $value != 'none' ) {
 			$gBitDb->query( "INSERT INTO `".BIT_DB_PREFIX."meta_associations` ( `content_id`, `meta_attribute_id`, `meta_value_id`, `user_id`, `start` ) VALUES( ?, ?, ?, ?, ? )", array( $pContent->mContentId, $att_id, $value, $gBitUser->mUserId, $now ) );
-		}
-		elseif( isset( $selected[$att_id]) && $value != $selected[$att_id] ) {
+		} elseif( isset( $selected[$att_id]) && $value != $selected[$att_id] ) {
 			$gBitDb->query( "UPDATE `".BIT_DB_PREFIX."meta_associations` SET `end` = ? WHERE `content_id` = ? AND `meta_attribute_id` = ?", array( $now, $pContent->mContentId, $att_id ) );
 			$gBitDb->query( "INSERT INTO `".BIT_DB_PREFIX."meta_associations` ( `content_id`, `meta_attribute_id`, `meta_value_id`, `user_id`, `start` ) VALUES( ?, ?, ?, ?, ? )", array( $pContent->mContentId, $att_id, $value, $gBitUser->mUserId, $now ) );
 		}
