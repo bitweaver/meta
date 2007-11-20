@@ -3,7 +3,7 @@ define( 'PLUGIN_GUID_DATAMETASEARCH', 'datametasearch' );
 define( 'PLUGIN_GUID_METADATA', 'datametadata' );
 
 // vim: set fdm=marker:
-function meta_placeholder_present() { // {{{
+function meta_placeholder_present() { // {{{ 
 	global $gBitThemes;
 	$gBitThemes->loadLayout();
 
@@ -14,23 +14,23 @@ function meta_placeholder_present() { // {{{
 					return true;
 					
 	return false;
-} // }}}
+} // }}} 
 
-function meta_get_possible_values( $db, $content_id = null, $other = true ) { // {{{
+function meta_get_possible_values( $content_id = null, $other = true ) { // {{{ 
 
-	global $gBitUser;
+	global $gBitUser, $gBitDb;
 
 	$attributes = array( '' => array() );
 	$selected = array();
 
 	if( $content_id != null ) {
-		$result = $db->query( "SELECT `meta_attribute_id`, `meta_value_id` FROM `".BIT_DB_PREFIX."meta_associations` WHERE `end` IS NULL AND `content_id` = ?", array( $content_id ) );
+		$result = $gBitDb->query( "SELECT `meta_attribute_id`, `meta_value_id` FROM `".BIT_DB_PREFIX."meta_associations` WHERE `end` IS NULL AND `content_id` = ?", array( $content_id ) );
 
 		foreach( $result->getRows() as $row )
 			$selected[ $row['meta_attribute_id'] ] = $row['meta_value_id'];
 	}
 
-	$result = $db->query( "
+	$result = $gBitDb->query( "
 	SELECT DISTINCT
 		`att`.`meta_attribute_id`, 
 		`name`,
@@ -76,9 +76,9 @@ function meta_get_possible_values( $db, $content_id = null, $other = true ) { //
 		array_shift( $attributes );
 
 	return $attributes;
-} // }}}
+} // }}} 
 
-function meta_content_display( &$pContent, &$pParamHash ) { // {{{
+function meta_content_display( &$pContent, &$pParamHash ) { // {{{ 
 	global $gBitSystem;
 	global $gBitSmarty;
 	global $metaTables;
@@ -120,20 +120,19 @@ function meta_content_display( &$pContent, &$pParamHash ) { // {{{
 		$metaTables[tra( "Attributes" )] = $metaInfo;
 	else
 		$gBitSmarty->assign( 'metaInfo', $metaInfo );
-} // }}}
+} // }}} 
 
-function meta_content_edit( &$pContent, &$pParamHash ) { // {{{
+function meta_content_edit( &$pContent, &$pParamHash ) { // {{{ 
 	global $gBitSmarty;
-	global $gBitSystem;
 
-	$gBitSmarty->assign( 'metaAttributes', meta_get_possible_values( $gBitSystem->mDb, $pContent->mContentId ) );
-} // }}}
+	$gBitSmarty->assign( 'metaAttributes', meta_get_possible_values( $pContent->mContentId ) );
+} // }}} 
 
-function meta_get_value_id( $db, $value ) { // {{{
+function meta_get_value_id( $value ) { // {{{ 
 
-	global $gBitUser;
+	global $gBitUser, $gBitDb;
 
-	$result = $db->query( "SELECT `meta_value_id` FROM `".BIT_DB_PREFIX."meta_values` WHERE `value` LIKE ?", array( $value ) );
+	$result = $gBitDb->query( "SELECT `meta_value_id` FROM `".BIT_DB_PREFIX."meta_values` WHERE `value` LIKE ?", array( $value ) );
 
 	$result = $result->getRows();
 
@@ -142,29 +141,28 @@ function meta_get_value_id( $db, $value ) { // {{{
 	else
 	{
 		if( $gBitUser->hasPermission( 'p_edit_value_meta' ) ) {
-			$id = $db->genID( 'meta_value_id_seq' );
+			$id = $gBitDb->genID( 'meta_value_id_seq' );
 
-			$db->query( "INSERT INTO `".BIT_DB_PREFIX."meta_values` (`meta_value_id`, `value`) VALUES( ?, ? )", array( $id, $value ) );
+			$gBitDb->query( "INSERT INTO `".BIT_DB_PREFIX."meta_values` (`meta_value_id`, `value`) VALUES( ?, ? )", array( $id, $value ) );
 
 			return $id;
 		}
 		else
 			return 0;
 	}
-} // }}}
+} // }}} 
 
-function meta_content_preview( &$pContent, &$pParamHash ) { // {{{
-	global $gBitSystem;
+function meta_content_preview( &$pContent, &$pParamHash ) { // {{{ 
+	global $gBitDb;
 	global $gBitUser;
 	global $gBitSmarty;
-	$db = $gBitSystem->mDb;
 
 	if( !$gBitUser->hasPermission( 'p_assign_meta' ) )
 		return;
 
-	$attributes = meta_get_possible_values( $db );
+	$attributes = meta_get_possible_values();
 
-	foreach( $_REQUEST['metatt'] as $att_id => $value ) {
+	foreach( $pParamHash['metatt'] as $att_id => $value ) {
 		foreach( $attributes as $group => $values ) {
 			if( isset( $values[$att_id] ) )
 				foreach( $values[$att_id]['values'] as $index => $row ) {
@@ -177,25 +175,25 @@ function meta_content_preview( &$pContent, &$pParamHash ) { // {{{
 	$gBitSmarty->assign( 'metaAttributes', $attributes );
 	$gBitSmarty->assign( 'metaAttributesOther', $_POST['metatt_other'] );
 
-} // }}}
+} // }}} 
 
-function meta_content_store( &$pContent, &$pParamHash ) { // {{{
+function meta_content_store( &$pContent, &$pParamHash ) { // {{{ 
 	global $gBitSystem, $gBitUser, $gBitDb;
 
 	if( !$pContent->hasUserPermission( 'p_assign_meta' ) )
 		return;
-	
-	if( !isset( $_REQUEST['metatt'] ) )
+
+	if( !isset( $pParamHash['metatt'] ) )
 		return;
 
 	$now = time();
 
 	$selected = $gBitDb->getAssoc( "SELECT `meta_attribute_id`, `meta_value_id` FROM `".BIT_DB_PREFIX."meta_associations` WHERE `end` IS NULL AND `content_id` = ?", array( $pContent->mContentId ) );
 
-	foreach( $_REQUEST['metatt'] as $att_id => $value ) {
-
-		if( !empty( $_REQUEST['metatt_other'][$att_id] ) ) {
-			$value = meta_get_value_id( $gBitDb, $_REQUEST['metatt_other'][$att_id] );
+	foreach( $pParamHash['metatt'] as $att_id => $value ) {
+print " $att_id => $value\n";
+		if( !empty( $pParamHash['metatt_other'][$att_id] ) ) {
+			$value = meta_get_value_id( $pParamHash['metatt_other'][$att_id] );
 		}
 
 		if( $value == 'none' && isset( $selected[$att_id] ) ) {
@@ -210,22 +208,20 @@ function meta_content_store( &$pContent, &$pParamHash ) { // {{{
 		}
 	}
 
-} // }}}
+} // }}} 
 
-function meta_content_expunge( &$pContent, &$pParamHash ) { // {{{
-	global $gBitSystem;
-	global $gBitUser;
-	$db = $gBitSystem->mDb;
+function meta_content_expunge( &$pContent, &$pParamHash ) { // {{{ 
+	global $gBitDb;
 
-	$db->query( "DELETE FROM `".BIT_DB_PREFIX."meta_associations` WHERE `content_id` = ?", array( $pParamHash->mContentId ) );
+	$gBitDb->query( "DELETE FROM `".BIT_DB_PREFIX."meta_associations` WHERE `content_id` = ?", array( $pParamHash->mContentId ) );
 
-} // }}}
+} // }}} 
 
-function data_metasearch_help() { // {{{
+function data_metasearch_help() { // {{{ 
 	return 'N/A';
-} // }}}
+} // }}} 
 
-function data_metasearch($data, $params) { // {{{
+function data_metasearch($data, $params) { // {{{ 
 	global $gBitSystem;
 	if( !isset( $params['param'] ) )
 		return 'Missing parameter "param".';
@@ -304,13 +300,13 @@ function data_metasearch($data, $params) { // {{{
 	}
 
 	return 'No results found.';
-} // }}}
+} // }}} 
 
-function data_metadata_help() { // {{{
+function data_metadata_help() { // {{{ 
 	return 'N/A';
-} // }}}
+} // }}} 
 
-function data_metadata( $data, $params ) { // {{{
+function data_metadata( $data, $params ) { // {{{ 
 	extract ($params, EXTR_SKIP);
 
 	
@@ -341,9 +337,9 @@ function data_metadata( $data, $params ) { // {{{
 	}
 	
     return ' ';
-} // }}}
+} // }}} 
 
-function meta_add_pair( $table, $name, $value, $section = '' ) { // {{{
+function meta_add_pair( $table, $name, $value, $section = '' ) { // {{{ 
 	global $metaTables;
 
 	if( !isset( $metaTables[$table] ) )
@@ -352,6 +348,6 @@ function meta_add_pair( $table, $name, $value, $section = '' ) { // {{{
 		$metaTables[$table][$section] = array();
 
 	$metaTables[$table][$section][] = array( 'name' => $name, 'value' => $value );
-} // }}}
+} // }}} 
 
 ?>

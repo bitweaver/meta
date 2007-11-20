@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_meta/index.php,v 1.5 2007/11/17 22:02:38 joasch Exp $
+// $Header: /cvsroot/bitweaver/_bit_meta/index.php,v 1.6 2007/11/20 17:06:40 spiderr Exp $
 // Copyright (c) 2004 bitweaver Sample
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
@@ -14,7 +14,7 @@ $gBitSystem->verifyPackage( 'meta' );
 // Now check permissions to access this page
 $gBitSystem->verifyPermission( 'p_view_meta' );
 
-$gBitSmarty->assign( 'metaAttributes', meta_get_possible_values( $gBitSystem->mDb, null, false ) );
+$gBitSmarty->assign( 'metaAttributes', meta_get_possible_values( null, false ) );
 
 if( isset( $_REQUEST['search'] ) ) {
 
