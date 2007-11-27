@@ -188,7 +188,6 @@ function meta_content_store( &$pContent, &$pParamHash ) { // {{{
 	$selected = $gBitDb->getAssoc( "SELECT `meta_attribute_id`, `meta_value_id` FROM `".BIT_DB_PREFIX."meta_associations` WHERE `end` IS NULL AND `content_id` = ?", array( $pContent->mContentId ) );
 
 	foreach( $pParamHash['metatt'] as $att_id => $value ) {
-print " $att_id => $value\n";
 		if( !empty( $pParamHash['metatt_other'][$att_id] ) ) {
 			$value = meta_get_value_id( $pParamHash['metatt_other'][$att_id] );
 		}
