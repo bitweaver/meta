@@ -158,14 +158,16 @@ function meta_content_preview( &$pContent, &$pParamHash ) { // {{{
 		return;
 
 	$attributes = meta_get_possible_values();
-
-	foreach( $pParamHash['metatt'] as $att_id => $value ) {
-		foreach( $attributes as $group => $values ) {
-			if( isset( $values[$att_id] ) )
-				foreach( $values[$att_id]['values'] as $index => $row ) {
-					if( $row['id'] == $value )
-						$attributes[$group][$att_id]['values'][$index]['selected'] = true;
-				}
+	
+	if( !empty( $pParamHash['metatt'] ) ) {
+		foreach( $pParamHash['metatt'] as $att_id => $value ) {
+			foreach( $attributes as $group => $values ) {
+				if( isset( $values[$att_id] ) )
+					foreach( $values[$att_id]['values'] as $index => $row ) {
+						if( $row['id'] == $value )
+							$attributes[$group][$att_id]['values'][$index]['selected'] = true;
+					}
+			}
 		}
 	}
 
