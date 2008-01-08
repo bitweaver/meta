@@ -337,6 +337,8 @@ function data_metatable($data, $params) { // {{{
 					}
 					$groupSql .= ' meta_attribute_id=? ';
 					$colVars[] = $valueId;
+				} else {
+					$columns[$value] = strtolower( $value );
 				}
 			}
 		}
@@ -354,14 +356,19 @@ function data_metatable($data, $params) { // {{{
 			$sql = "SELECT * 
 					FROM `".BIT_DB_PREFIX."meta_associations` metaa
 						INNER JOIN `".BIT_DB_PREFIX."meta_values` metav ON( metaa.`meta_value_id`=metav.`meta_value_id`)
-					WHERE `content_id`=?  $whereSql ";
+					WHERE metaa.`content_id`=?  $whereSql ";
 			if( $vals = $gBitSystem->mDb->getAll( $sql, $bindVars ) ) {
 				foreach( $vals as $v ) {
 					$rowData[$v['meta_attribute_id']] = $v['value'];
 				}
 			}
+			$sql = "SELECT lc.*, lcds.`data` AS `summary` 
+					FROM `".BIT_DB_PREFIX."liberty_content` lc 
+						LEFT OUTER JOIN `".BIT_DB_PREFIX."liberty_content_data` lcds ON( lc.`content_id` = lcds.`content_id` AND lcds.`data_type` = ? )
+					WHERE lc.`content_id`=?";
+			$contentData = current( $gBitSystem->mDb->getAssoc( $sql, array( 'summary', $row['content_id'] ) ) );
 			foreach( $columns AS $valueId=>$value ) {
-				$dataString .= '<td class=""'.$rowClass.'">'.(!empty( $rowData[$valueId] ) ? $rowData[$valueId] : '&nbsp;') .'</td>';
+				$dataString .= '<td class=""'.$rowClass.'">'.(!empty( $rowData[$valueId] ) ? $rowData[$valueId] : (!empty( $contentData[$value] ) ? $contentData[$value] : '&nbsp;')).'</td>';
 			}
 			$data[] = $dataString;
 		}
