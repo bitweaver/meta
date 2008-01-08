@@ -51,5 +51,19 @@ if( $gBitSystem->isPackageActive( 'meta' ) ) {
 	);
 	$gLibertySystem->registerPlugin( PLUGIN_GUID_METADATA, $pluginParams );
 	$gLibertySystem->registerDataTag( $pluginParams['tag'], PLUGIN_GUID_METADATA );
+
+	$pluginParams = array ( 'tag' => 'metatable',
+		'auto_activate' => TRUE,
+		'requires_pair' => FALSE,
+		'load_function' => 'data_metatable',
+		'title' => 'Meta Data',
+		'help_page' => 'DataPluginMetaTable',
+		'description' => tra("Displays a table of listed values from the meta data ."),
+		'help_function' => 'data_metadata_help',
+		'syntax' => " {METADATA param=attribute:value,attribute:value,... columns=attribute,attribute,... }". tra("Colon separated key:value pairs, one per line.") . "{/METADATA}",
+		'plugin_type' => DATA_PLUGIN
+	);
+	$gLibertySystem->registerPlugin( PLUGIN_GUID_METADATA, $pluginParams );
+	$gLibertySystem->registerDataTag( $pluginParams['tag'], PLUGIN_GUID_METADATA );
 }
 ?>

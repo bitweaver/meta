@@ -8,7 +8,7 @@
 		{/if}
 		{foreach from=$elements key=key item=meta}
 		<tr>
-			<th>{$meta.name}</th>
+			<th>{if $gContent->hasUserPermission('p_browse_meta')}<a href="{$smarty.const.META_PKG_URL}?metatt[{$meta.name}]">{/if}{$meta.name}{if $gContent->hasUserPermission('p_browse_meta')}</a>{/if}</th>
 			<td>{$meta.value}</td>
 		</tr>
 		{/foreach}

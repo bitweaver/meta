@@ -128,6 +128,11 @@ function meta_content_edit( &$pContent, &$pParamHash ) { // {{{
 	$gBitSmarty->assign( 'metaAttributes', meta_get_possible_values( $pContent->mContentId ) );
 } // }}} 
 
+function meta_get_attribute_id( $pAttributeName ) { // {{{ 
+	global $gBitDb;
+	return $gBitDb->getOne( "SELECT `meta_attribute_id` FROM `".BIT_DB_PREFIX."meta_attributes` WHERE `name` = ?", array( $pAttributeName ) );
+} // }}} 
+
 function meta_get_value_id( $value ) { // {{{ 
 	global $gBitUser, $gBitDb;
 
@@ -217,19 +222,43 @@ function data_metasearch_help() { // {{{
 	return 'N/A';
 } // }}} 
 
-function data_metasearch($data, $params) { // {{{ 
-	global $gBitSystem;
-	if( !isset( $params['param'] ) )
-		return 'Missing parameter "param".';
-		
-	$p = explode( ',', $params['param'] );
+function meta_search( $pParamHash ) { // {{{ 
+	global $gBitDb;
+	$ret = array();
+	$bindVars = array();
+	$havingSql = '';
+
+	if( !empty( $pParamHash['conditions'] ) && count( $pParamHash['conditions'] ) > 0 ) {
+		$havingSql = " HAVING " . implode( ' AND ', $pParamHash['conditions']['sql'] );
+		$bindVars = array_merge( $bindVars, $pParamHash['conditions']['params']  );
+	}
+
+		$query = "
+			SELECT lc.`content_id`, lc.`title`, lc.`last_modified`, `user`.`real_name`
+			FROM
+				`".BIT_DB_PREFIX."meta_associations` as `meta`
+				INNER JOIN `".BIT_DB_PREFIX."meta_attributes` as `attribute` ON `meta`.`meta_attribute_id` = `attribute`.`meta_attribute_id`
+				INNER JOIN `".BIT_DB_PREFIX."meta_values` as `value` ON `meta`.`meta_value_id` = `value`.`meta_value_id`
+				INNER JOIN `".BIT_DB_PREFIX."liberty_content` as lc ON `meta`.`content_id` = lc.`content_id`
+				INNER JOIN `".BIT_DB_PREFIX."users_users` as `user` ON `user`.`user_id` = lc.`user_id`
+			WHERE `meta`.`end` IS NULL
+			GROUP BY `meta`.`content_id`
+			$havingSql
+			ORDER BY lc.`last_modified` DESC";
+
+		$result = $gBitDb->query( $query, $bindVars );
+		$ret = $result->getRows();
+	
+	return $ret;
+} // }}} 
+
+function meta_parse_plugin_params( $paramString ) {
+	$p = explode( ',', $paramString );
 	$p = array_map( 'trim', $p );
 
 	$conditions = array();
-	$parameters = array();
-	
 	foreach( $p as $value ) {
-		list( $key, $values ) = explode( ':', $value );
+		list( $key, $values ) = explode( '=', $value );
 		$values = explode( '|', $values );
 
 		$temp = array();
@@ -248,54 +277,102 @@ function data_metasearch($data, $params) { // {{{
 			}
 
 			$temp[] = "COUNT( IF( `attribute`.`name` = ? AND `value`.`value` = ?, 'GOOD', NULL ) ) > 0";
-			$parameters[] = $key;
-			$parameters[] = $value;
+			$conditions['params'][] = $key;
+			$conditions['params'][] = $value;
 		}
 
-		if( count( $temp ) > 0 )
-			$conditions[] = "( " . implode( ' OR ', $temp ) . " )";
+		if( count( $temp ) > 0 ) {
+			$conditions['sql'][] = "( " . implode( ' OR ', $temp ) . " )";
+		}
 	}
+	return $conditions;
+}
 
-	if( count( $conditions ) > 0 ) {
-
-		$query = "
-			SELECT
-				`content`.`content_id` as `id`,
-				`content`.`title`,
-				`content`.`last_modified`,
-				`user`.`real_name`
-			FROM
-				`".BIT_DB_PREFIX."meta_associations` as `meta`
-				INNER JOIN `".BIT_DB_PREFIX."meta_attributes` as `attribute` ON `meta`.`meta_attribute_id` = `attribute`.`meta_attribute_id`
-				INNER JOIN `".BIT_DB_PREFIX."meta_values` as `value` ON `meta`.`meta_value_id` = `value`.`meta_value_id`
-				INNER JOIN `".BIT_DB_PREFIX."liberty_content` as `content` ON `meta`.`content_id` = `content`.`content_id`
-				INNER JOIN `".BIT_DB_PREFIX."users_users` as `user` ON `user`.`user_id` = `content`.`user_id`
-			WHERE
-				`meta`.`end` IS NULL
-			GROUP BY
-				`meta`.`content_id`
-			HAVING
-				" . implode( ' AND ', $conditions ) . "
-			ORDER BY
-				`content`.`last_modified` DESC";
-
-		$result = $gBitSystem->mDb->query( $query, $parameters );
-
-		$rows = $result->getRows();
-
-		$data = array();
+function data_metasearch($data, $params) { // {{{ 
+	global $gBitSystem;
+	if( !isset( $params['param'] ) ) {
+		return tra( 'Missing parameter "param".' );
+	}
+		
+	$listHash['conditions'] = meta_parse_plugin_params( $params['param'] );
+	$data = array();
+	if( $rows = meta_search( $listHash ) ) {
 		foreach( $rows as $row ) {
 			$data[] = "[" . BIT_ROOT_URL 
 				. "/index.php?content_id={$row['id']}|{$row['title']}]|" 
 				. strftime( $gBitSystem->get_long_date_format(), $row['last_modified'] )
 				. "|" . $row['real_name'];
 		}
+	}
+	if( count( $data ) > 0 ) {
+		$ret = '||' . implode( "\r\n", $data ) . '||';
+	} else {
+		$ret = tra( 'No results found.' );
+	}
+	return $ret;
+} // }}} 
 
-		if( count( $data ) > 0 )
-			return '||' . implode( "\r\n", $data ) . '||';
+function data_metatable($data, $params) { // {{{ 
+	global $gBitSystem;
+	$whereSql = '';
+	if( !isset( $params['param'] ) ) {
+		return tra( 'Missing parameter "param".' );
+	}
+		
+	$listHash['conditions'] = meta_parse_plugin_params( $params['param'] );
+	$data = array();
+	if( $rows = meta_search( $listHash ) ) {
+		$columns = array( '-1'=>'Name' );
+		if( !empty( $params['columns'] ) ) {
+			$colVars = array();
+			$groupSql = '';
+			$p = explode( ',', $params['columns'] );
+			$p = array_map( 'trim', $p );
+
+			foreach( $p as $value ) {
+				if( $valueId = meta_get_attribute_id( $value ) ) {
+					$columns[$valueId] = $value;
+					if( !empty( $groupSql ) ) {
+						$groupSql .= ' OR ';
+					}
+					$groupSql .= ' meta_attribute_id=? ';
+					$colVars[] = $valueId;
+				}
+			}
+		}
+
+		$rowCount = 1;
+		foreach( $rows as $row ) {
+			$dataString = '';
+			$whereSql = '';
+			$rowClass = ($rowCount++ % 2) ? 'odd' : 'even';
+			$bindVars = array_merge( array( $row['content_id'] ), $colVars );
+			$rowData[-1] = '<a href="'.BIT_ROOT_URL.'index.php?content_id='.$row['content_id'].'">'.$row['title'].'</a>';
+			if( $groupSql ) {
+				$whereSql .= " AND ( $groupSql ) ";
+			}
+			$sql = "SELECT * 
+					FROM `".BIT_DB_PREFIX."meta_associations` metaa
+						INNER JOIN `".BIT_DB_PREFIX."meta_values` metav ON( metaa.`meta_value_id`=metav.`meta_value_id`)
+					WHERE `content_id`=?  $whereSql ";
+			if( $vals = $gBitSystem->mDb->getAll( $sql, $bindVars ) ) {
+				foreach( $vals as $v ) {
+					$rowData[$v['meta_attribute_id']] = $v['value'];
+				}
+			}
+			foreach( $columns AS $valueId=>$value ) {
+				$dataString .= '<td class=""'.$rowClass.'">'.(!empty( $rowData[$valueId] ) ? $rowData[$valueId] : '&nbsp;') .'</td>';
+			}
+			$data[] = $dataString;
+		}
+	}
+	if( count( $data ) > 0 ) {
+		$ret = '<table class="bittable"><tr><th class="bitbar">'.implode( '</th><th class="bitbar">', $columns ).'</th></tr><tr>' . implode( "</tr><tr>", $data ) . '</tr></table>';
+	} else {
+		$ret = tra( 'No results found.' );
 	}
 
-	return 'No results found.';
+	return $ret;
 } // }}} 
 
 function data_metadata_help() { // {{{ 
@@ -318,7 +395,7 @@ function data_metadata( $data, $params ) { // {{{
 	$categ = '';
 
 	foreach( $data as $row ) {
-		$row = explode( ':', $row, 2 );
+		$row = explode( '=', $row, 2 );
 		$row = array_map( 'trim', $row );
 
 		switch( count( $row ) ) {
