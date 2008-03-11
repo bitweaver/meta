@@ -338,7 +338,7 @@ function data_metatable($data, $params) { // {{{
 					$groupSql .= ' meta_attribute_id=? ';
 					$colVars[] = $valueId;
 				} else {
-					$columns[$value] = strtolower( $value );
+					$columns[strtolower( $value )] = $value;
 				}
 			}
 		}
@@ -368,7 +368,7 @@ function data_metatable($data, $params) { // {{{
 					WHERE lc.`content_id`=?";
 			$contentData = current( $gBitSystem->mDb->getAssoc( $sql, array( 'summary', $row['content_id'] ) ) );
 			foreach( $columns AS $valueId=>$value ) {
-				$dataString .= '<td class=""'.$rowClass.'">'.(!empty( $rowData[$valueId] ) ? $rowData[$valueId] : (!empty( $contentData[$value] ) ? $contentData[$value] : '&nbsp;')).'</td>';
+				$dataString .= '<td class=""'.$rowClass.'">'.(!empty( $rowData[$valueId] ) ? $rowData[$valueId] : (!empty( $contentData[$valueId] ) ? $contentData[$valueId] : '&nbsp;')).'</td>';
 			}
 			$data[] = $dataString;
 		}
