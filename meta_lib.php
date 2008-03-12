@@ -345,6 +345,7 @@ function data_metatable($data, $params) { // {{{
 
 		$rowCount = 1;
 		foreach( $rows as $row ) {
+			$rowData = array();
 			$dataString = '';
 			$whereSql = '';
 			$rowClass = ($rowCount++ % 2) ? 'odd' : 'even';
