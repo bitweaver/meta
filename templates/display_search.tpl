@@ -10,12 +10,15 @@
 					<h2>{$group}</h2>
 				{/if}
 				{foreach from=$attributes key=attribute_id item=data}
+				{assign var="metaName" value=$data.name}
 				<div class="row">
 					{formlabel label="`$data.name`" for="`$attribute_id`"}
 					{forminput}
-						<select name="metatt[{$attribute_id}]">
+						<select name="metatt[{$metaName|escape}]">
+							<option value=""></option>
+							<option value="any">{tr}Any Assigned Value{/tr}</option>
 							{foreach from=$data.values key=key item=value}
-							<option value="{$value.id}">{$value.value}</option>
+							<option value="{$value.value|escape}" {if $smarty.request.metatt.$metaName==$value.value}selected="selected"{/if}>{$value.value}</option>
 							{/foreach}
 						</select>
 					{/forminput}
@@ -30,10 +33,9 @@
 				<input type="submit" name="search" value="{tr}Search{/tr}"/>
 			</div>
 		{/jstab}
-		{if $gBitSystem->isPackageActive( 'pigeonholes' )}
-			{include file=bitpackage:pigeonholes/pigeonholes_input_inc.tpl}
-		{/if}
-		{jstab title="Results"}
+	{/jstabs}
+		{if $searchData}
+			<h1>{tr}Search Results{/tr}</h1>
 			<table class="clear data">
 				<tr>
 					<th>{tr}Title{/tr}</th>
@@ -52,7 +54,6 @@
 				</tr>
 				{/foreach}
 			</table>
-		{/jstab}
-	{/jstabs}
+		{/if}
 {/form}
 </div>

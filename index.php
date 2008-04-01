@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_meta/index.php,v 1.7 2008/01/08 16:51:42 spiderr Exp $
+// $Header: /cvsroot/bitweaver/_bit_meta/index.php,v 1.8 2008/04/01 17:54:08 spiderr Exp $
 // Copyright (c) 2004 bitweaver Sample
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
@@ -19,15 +19,27 @@ $gBitSmarty->assign( 'metaAttributes', meta_get_possible_values( null, false ) )
 if( isset( $_REQUEST['metatt'] ) ) {
 
 	$conditions = array();
-	
-	foreach( $_REQUEST['metatt'] as $key => $value ) {
-		if( $value == 'none' ) {
-			$conditions[] = "COUNT( IF( `meta`.`meta_attribute_id` = $key, 'GOOD', NULL ) ) = 0";
-			continue;
-		}
 
-		if( is_numeric( $key ) && is_numeric( $value ) ) {
-			$conditions[] = "COUNT( IF( `meta`.`meta_attribute_id` = $key AND `meta`.`meta_value_id` = $value, 'GOOD', NULL ) ) > 0";
+	foreach( $_REQUEST['metatt'] as $key => $value ) {
+		if( !empty( $value ) ) {
+			if( $value == 'none' ) {
+				$conditions['sql'][] = "COUNT( IF( `attribute`.`meta_attribute_id` = $key, 'GOOD', NULL ) ) = 0";
+				$conditions['params'][] = $value;
+				continue;
+			} else {
+				if( is_numeric( $key ) ) {
+					$searchCol = '`meta_attribute_id`';
+				} else {
+					$searchCol = '`name`';
+				}
+				$conditions['params'][] = $key;
+				$searchValue = '';
+				if( !empty( $value ) ) {
+					$searchValue = " AND `value`.`value` = ?";
+					$conditions['params'][] = $value;
+				}
+				$conditions['sql'][] = "COUNT( IF( `attribute`.$searchCol = ? $searchValue , 'GOOD', NULL ) ) > 0";
+			}
 		}
 	}
 
