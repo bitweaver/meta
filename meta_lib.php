@@ -227,6 +227,18 @@ function meta_search( $pParamHash ) { // {{{
 	$ret = array();
 	$bindVars = array();
 	$havingSql = '';
+	$whereSql = '';
+
+	if( !empty( $pParamHash['name'] ) ) {
+		foreach( $pParamHash['name'] as $name=>$value ) {
+			$whereSql .= ' AND `attribute`.`name`=? ';
+			$bindVars[] = $name;
+			if( !empty( $value ) ) {
+				$whereSql .= ' AND `value`.`value`=? ';
+				$bindVars[] = $value;
+			}
+		}
+	}
 
 	if( !empty( $pParamHash['conditions'] ) && count( $pParamHash['conditions'] ) > 0 ) {
 		$havingSql = " HAVING " . implode( ' AND ', $pParamHash['conditions']['sql'] );
@@ -234,21 +246,27 @@ function meta_search( $pParamHash ) { // {{{
 	}
 
 		$query = "
-			SELECT lc.`content_id`, lc.`title`, lc.`last_modified`, `user`.`real_name`
+			SELECT lc.`content_id`, lc.`title`, lc.`last_modified`, `user`.`real_name`, `attribute`.`name`, `value`.`value`
 			FROM
 				`".BIT_DB_PREFIX."meta_associations` as `meta`
 				INNER JOIN `".BIT_DB_PREFIX."meta_attributes` as `attribute` ON `meta`.`meta_attribute_id` = `attribute`.`meta_attribute_id`
 				INNER JOIN `".BIT_DB_PREFIX."meta_values` as `value` ON `meta`.`meta_value_id` = `value`.`meta_value_id`
 				INNER JOIN `".BIT_DB_PREFIX."liberty_content` as lc ON `meta`.`content_id` = lc.`content_id`
 				INNER JOIN `".BIT_DB_PREFIX."users_users` as `user` ON `user`.`user_id` = lc.`user_id`
-			WHERE `meta`.`end` IS NULL
+			WHERE `meta`.`end` IS NULL $whereSql
 			GROUP BY `meta`.`content_id`
 			$havingSql
 			ORDER BY lc.`last_modified` DESC";
 
-		$result = $gBitDb->query( $query, $bindVars );
-		$ret = $result->getRows();
-	
+		if( $result = $gBitDb->query( $query, $bindVars ) ) {
+			while( $row = $result->fetchRow() ) {
+				if( empty( $ret[$row['content_id']] ) ) {
+					$ret[$row['content_id']] = $row;
+				}
+				$ret[$row['content_id']]['meta'][$row['name']] = $row['value'];
+			}
+		}
+
 	return $ret;
 } // }}} 
 

@@ -16,7 +16,7 @@
 					{forminput}
 						<select name="metatt[{$metaName|escape}]">
 							<option value=""></option>
-							<option value="any">{tr}Any Assigned Value{/tr}</option>
+							<option value="*any*" {if $smarty.request.metatt.$metaName=='*any*'}selected="selected"{/if}>{tr}Any Assigned Value{/tr}</option>
 							{foreach from=$data.values key=key item=value}
 							<option value="{$value.value|escape}" {if $smarty.request.metatt.$metaName==$value.value}selected="selected"{/if}>{$value.value}</option>
 							{/foreach}
@@ -41,12 +41,14 @@
 					<th>{tr}Title{/tr}</th>
 					<th>{tr}Last Modified{/tr}</th>
 					<th>{tr}Author{/tr}</th>
+					<th>{tr}Value{/tr}</th>
 				</tr>
 				{foreach from=$searchData key=k item=res}
 				<tr>
-					<td><a href="{$smarty.const.BIT_ROOT_URL}?content_id={$res.id}">{$res.title|escape}</a></td>
+					<td><a href="{$smarty.const.BIT_ROOT_URL}?content_id={$res.content_id}">{$res.title|escape}</a></td>
 					<td>{$res.last_modified|bit_long_date}</td>
 					<td>{$res.real_name}</td>
+					<td>{$res.meta|@implode:' => '}</td>
 				</tr>
 				{foreachelse}
 				<tr>
