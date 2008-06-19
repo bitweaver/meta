@@ -1,10 +1,20 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_meta/edit_attributes.php,v 1.4 2007/11/20 17:06:40 spiderr Exp $
-// Copyright (c) 2004 bitweaver Sample
-// All Rights Reserved. See copyright.txt for details and a complete list of authors.
-// Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
+/**
+ * $Header: /cvsroot/bitweaver/_bit_meta/edit_attributes.php,v 1.5 2008/06/19 04:44:57 lsces Exp $
+ *
+ * Copyright (c) 2004 bitweaver.org
+ * Copyright (c) 2003 tikwiki.org
+ * Copyright (c) 2002-2003, Luis Argerich, Garland Foster, Eduardo Polidor, et. al.
+ * All Rights Reserved. See copyright.txt for details and a complete list of authors.
+ * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
+ *
+ * @package meta
+ * @subpackage functions
+ */
 
-// Initialization
+/**
+ * Initialization
+ */
 require_once( '../bit_setup_inc.php' );
 
 // Is package installed and enabled
