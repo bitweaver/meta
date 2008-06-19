@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_meta/meta_lib.php,v 1.24 2008/06/19 04:45:12 lsces Exp $
+ * $Header: /cvsroot/bitweaver/_bit_meta/meta_lib.php,v 1.25 2008/06/19 05:19:04 lsces Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -10,6 +10,10 @@
  *
  * @package meta
  * @subpackage functions
+ */
+
+/**
+ * Initialize
  */
 define( 'PLUGIN_GUID_DATAMETASEARCH', 'datametasearch' );
 define( 'PLUGIN_GUID_METADATA', 'datametadata' );
