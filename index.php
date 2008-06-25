@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_meta/index.php,v 1.9 2008/04/07 14:10:51 spiderr Exp $
+// $Header: /cvsroot/bitweaver/_bit_meta/index.php,v 1.10 2008/06/25 22:21:14 spiderr Exp $
 // Copyright (c) 2004 bitweaver Sample
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
@@ -45,5 +45,5 @@ if( isset( $_REQUEST['metatt'] ) ) {
 }
 
 // Display the template
-$gBitSystem->display( 'bitpackage:meta/display_search.tpl', tra( 'Meta Search' ) );
+$gBitSystem->display( 'bitpackage:meta/display_search.tpl', tra( 'Meta Search' ) , array( 'display_mode' => 'display' ));
 ?>

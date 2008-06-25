@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_meta/edit_attributes.php,v 1.5 2008/06/19 04:44:57 lsces Exp $
+ * $Header: /cvsroot/bitweaver/_bit_meta/edit_attributes.php,v 1.6 2008/06/25 22:21:14 spiderr Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -81,5 +81,5 @@ $gBitSmarty->assign( 'attributes', $result->getRows() );
 // }}}1
 
 // Display the template
-$gBitSystem->display( 'bitpackage:meta/edit_attributes.tpl', tra( 'Manage Meta Attributes' ) );
+$gBitSystem->display( 'bitpackage:meta/edit_attributes.tpl', tra( 'Manage Meta Attributes' ) , array( 'display_mode' => 'edit' ));
 ?>
