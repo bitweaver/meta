@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_meta/meta_lib.php,v 1.25 2008/06/19 05:19:04 lsces Exp $
+ * $Header: /cvsroot/bitweaver/_bit_meta/meta_lib.php,v 1.26 2008/09/23 15:46:28 spiderr Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -95,10 +95,10 @@ function meta_get_possible_values( $content_id = null, $other = true ) { // {{{
 } // }}} 
 
 function meta_content_display( &$pContent, &$pParamHash ) { // {{{ 
-	global $gBitSystem;
+	global $gBitDb;
 	global $gBitSmarty;
 	global $metaTables;
-	$result = $gBitSystem->mDb->query( "
+	$result = $gBitDb->query( "
 	SELECT 
 		`".BIT_DB_PREFIX."meta_attributes`.`name`, 
 		`".BIT_DB_PREFIX."meta_values`.`value` 
@@ -171,9 +171,7 @@ function meta_get_value_id( $value ) { // {{{
 } // }}} 
 
 function meta_content_preview( &$pContent, &$pParamHash ) { // {{{ 
-	global $gBitDb;
-	global $gBitUser;
-	global $gBitSmarty;
+	global $gBitDb, $gBitUser, $gBitSmarty;
 
 	if( !$gBitUser->hasPermission( 'p_assign_meta' ) )
 		return;
@@ -198,7 +196,7 @@ function meta_content_preview( &$pContent, &$pParamHash ) { // {{{
 } // }}} 
 
 function meta_content_store( &$pContent, &$pParamHash ) { // {{{ 
-	global $gBitSystem, $gBitUser, $gBitDb;
+	global $gBitUser, $gBitDb;
 
 	if( !$pContent->hasUserPermission( 'p_assign_meta' ) )
 		return;
@@ -347,7 +345,7 @@ function data_metasearch($data, $params) { // {{{
 } // }}} 
 
 function data_metatable($data, $params) { // {{{ 
-	global $gBitSystem;
+	global $gBitDb;
 	$whereSql = '';
 	if( !isset( $params['param'] ) ) {
 		return tra( 'Missing parameter "param".' );
@@ -391,8 +389,8 @@ function data_metatable($data, $params) { // {{{
 			$sql = "SELECT * 
 					FROM `".BIT_DB_PREFIX."meta_associations` metaa
 						INNER JOIN `".BIT_DB_PREFIX."meta_values` metav ON( metaa.`meta_value_id`=metav.`meta_value_id`)
-					WHERE metaa.`content_id`=?  $whereSql ";
-			if( $vals = $gBitSystem->mDb->getAll( $sql, $bindVars ) ) {
+					WHERE metaa.`content_id`=? AND `".BIT_DB_PREFIX."metaa`.`end` IS NULL $whereSql ";
+			if( $vals = $gBitDb->getAll( $sql, $bindVars ) ) {
 				foreach( $vals as $v ) {
 					$rowData[$v['meta_attribute_id']] = $v['value'];
 				}
@@ -401,13 +399,14 @@ function data_metatable($data, $params) { // {{{
 					FROM `".BIT_DB_PREFIX."liberty_content` lc 
 						LEFT OUTER JOIN `".BIT_DB_PREFIX."liberty_content_data` lcds ON( lc.`content_id` = lcds.`content_id` AND lcds.`data_type` = ? )
 					WHERE lc.`content_id`=?";
-			$contentData = current( $gBitSystem->mDb->getAssoc( $sql, array( 'summary', $row['content_id'] ) ) );
+			$contentData = current( $gBitDb->getAssoc( $sql, array( 'summary', $row['content_id'] ) ) );
 			foreach( $columns AS $valueId=>$value ) {
 				$dataString .= '<td class=""'.$rowClass.'">'.(!empty( $rowData[$valueId] ) ? $rowData[$valueId] : (!empty( $contentData[$valueId] ) ? $contentData[$valueId] : '&nbsp;')).'</td>';
 			}
 			$data[] = $dataString;
 		}
 	}
+
 	if( count( $data ) > 0 ) {
 		$ret = '<table class="bittable"><tr><th class="bitbar">'.implode( '</th><th class="bitbar">', $columns ).'</th></tr><tr>' . implode( "</tr><tr>", $data ) . '</tr></table>';
 	} else {
