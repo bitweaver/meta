@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_meta/meta_lib.php,v 1.26 2008/09/23 15:46:28 spiderr Exp $
+ * $Header: /cvsroot/bitweaver/_bit_meta/meta_lib.php,v 1.27 2008/09/23 16:12:43 spiderr Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -214,11 +214,11 @@ function meta_content_store( &$pContent, &$pParamHash ) { // {{{
 		}
 
 		if( $value == 'none' && isset( $selected[$att_id] ) ) {
-			$gBitDb->query( "UPDATE `".BIT_DB_PREFIX."meta_associations` SET `end` = ? WHERE `content_id` = ? AND `meta_attribute_id` = ?", array( $now, $pContent->mContentId, $att_id ) );
+			$gBitDb->query( "UPDATE `".BIT_DB_PREFIX."meta_associations` SET `end` = ? WHERE `content_id` = ? AND `meta_attribute_id` = ? AND `end` IS NULL", array( $now, $pContent->mContentId, $att_id ) );
 		} elseif( !isset( $selected[$att_id] ) && $value != 'none' ) {
 			$gBitDb->query( "INSERT INTO `".BIT_DB_PREFIX."meta_associations` ( `content_id`, `meta_attribute_id`, `meta_value_id`, `user_id`, `start` ) VALUES( ?, ?, ?, ?, ? )", array( $pContent->mContentId, $att_id, $value, $gBitUser->mUserId, $now ) );
 		} elseif( isset( $selected[$att_id]) && $value != $selected[$att_id] ) {
-			$gBitDb->query( "UPDATE `".BIT_DB_PREFIX."meta_associations` SET `end` = ? WHERE `content_id` = ? AND `meta_attribute_id` = ?", array( $now, $pContent->mContentId, $att_id ) );
+			$gBitDb->query( "UPDATE `".BIT_DB_PREFIX."meta_associations` SET `end` = ? WHERE `content_id` = ? AND `meta_attribute_id` = ? AND `end` IS NULL", array( $now, $pContent->mContentId, $att_id ) );
 			$gBitDb->query( "INSERT INTO `".BIT_DB_PREFIX."meta_associations` ( `content_id`, `meta_attribute_id`, `meta_value_id`, `user_id`, `start` ) VALUES( ?, ?, ?, ?, ? )", array( $pContent->mContentId, $att_id, $value, $gBitUser->mUserId, $now ) );
 		}
 	}
