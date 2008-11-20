@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_meta/meta_lib.php,v 1.27 2008/09/23 16:12:43 spiderr Exp $
+ * $Header: /cvsroot/bitweaver/_bit_meta/meta_lib.php,v 1.28 2008/11/20 19:17:54 spiderr Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -99,18 +99,12 @@ function meta_content_display( &$pContent, &$pParamHash ) { // {{{
 	global $gBitSmarty;
 	global $metaTables;
 	$result = $gBitDb->query( "
-	SELECT 
-		`".BIT_DB_PREFIX."meta_attributes`.`name`, 
-		`".BIT_DB_PREFIX."meta_values`.`value` 
-	FROM 
-		`".BIT_DB_PREFIX."meta_associations` 
-		INNER JOIN `".BIT_DB_PREFIX."meta_attributes` ON 
-			`".BIT_DB_PREFIX."meta_associations`.`meta_attribute_id` = `".BIT_DB_PREFIX."meta_attributes`.`meta_attribute_id` 
-		INNER JOIN `".BIT_DB_PREFIX."meta_values` ON
-			`".BIT_DB_PREFIX."meta_associations`.`meta_value_id` = `".BIT_DB_PREFIX."meta_values`.`meta_value_id` 
-	WHERE 
-		`".BIT_DB_PREFIX."meta_associations`.`content_id` = ? 
-		AND `".BIT_DB_PREFIX."meta_associations`.`end` IS NULL"
+	SELECT matt.`name`, mval.`value` 
+	FROM `".BIT_DB_PREFIX."meta_associations` mass
+		INNER JOIN `".BIT_DB_PREFIX."meta_attributes` matt ON mass.`meta_attribute_id` = matt.`meta_attribute_id` 
+		INNER JOIN `".BIT_DB_PREFIX."meta_values` mval ON mass.`meta_value_id` = mval.`meta_value_id` 
+	WHERE mass.`content_id` = ?  AND mass.`end` IS NULL
+	ORDER BY matt.`name`"
 	, array( $pContent->mContentId ) );
 
 
