@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_meta/meta_lib.php,v 1.28 2008/11/20 19:17:54 spiderr Exp $
+ * $Header: /cvsroot/bitweaver/_bit_meta/meta_lib.php,v 1.29 2008/11/21 20:40:41 spiderr Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -248,6 +248,10 @@ function meta_search( $pParamHash ) { // {{{
 		}
 	}
 
+	if( empty( $pParamHash['sort_mode'] ) ) {
+		$pParamHash['sort_mode'] = 'title_asc';
+	}
+
 	if( !empty( $pParamHash['conditions'] ) && count( $pParamHash['conditions'] ) > 0 ) {
 		$havingSql = " HAVING " . implode( ' AND ', $pParamHash['conditions']['sql'] );
 		$bindVars = array_merge( $bindVars, $pParamHash['conditions']['params']  );
@@ -263,8 +267,8 @@ function meta_search( $pParamHash ) { // {{{
 				INNER JOIN `".BIT_DB_PREFIX."users_users` as `user` ON `user`.`user_id` = lc.`user_id`
 			WHERE `meta`.`end` IS NULL $whereSql
 			GROUP BY `meta`.`content_id`
-			$havingSql
-			ORDER BY lc.`last_modified` DESC";
+			$havingSql 
+			ORDER BY ". $gBitDb->convertSortmode( $pParamHash['sort_mode'] );
 
 		if( $result = $gBitDb->query( $query, $bindVars ) ) {
 			while( $row = $result->fetchRow() ) {
