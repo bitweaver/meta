@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_meta/meta_lib.php,v 1.29 2008/11/21 20:40:41 spiderr Exp $
+ * $Header: /cvsroot/bitweaver/_bit_meta/meta_lib.php,v 1.30 2008/11/25 17:05:24 spiderr Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -375,13 +375,14 @@ function data_metatable($data, $params) { // {{{
 
 		$rowCount = 1;
 		foreach( $rows as $row ) {
+			$bindVars = array( $row['content_id'] );
 			$rowData = array();
 			$dataString = '';
 			$whereSql = '';
 			$rowClass = ($rowCount++ % 2) ? 'odd' : 'even';
-			$bindVars = array_merge( array( $row['content_id'] ), $colVars );
 			$rowData[-1] = '<a href="'.BIT_ROOT_URL.'index.php?content_id='.$row['content_id'].'">'.$row['title'].'</a>';
 			if( $groupSql ) {
+				$bindVars = array_merge( $bindVars, $colVars );
 				$whereSql .= " AND ( $groupSql ) ";
 			}
 			$sql = "SELECT * 
