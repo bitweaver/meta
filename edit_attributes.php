@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_meta/edit_attributes.php,v 1.8 2009/10/01 14:17:02 wjames5 Exp $
+ * $Header: /cvsroot/bitweaver/_bit_meta/edit_attributes.php,v 1.9 2010/02/08 21:27:24 wjames5 Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -15,7 +15,7 @@
 /**
  * Initialization
  */
-require_once( '../bit_setup_inc.php' );
+require_once( '../kernel/setup_inc.php' );
 
 // Is package installed and enabled
 $gBitSystem->verifyPackage( 'meta' );
