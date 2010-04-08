@@ -48,7 +48,7 @@
 					<td><a href="{$smarty.const.BIT_ROOT_URL}?content_id={$res.content_id}">{$res.title|escape}</a></td>
 					<td>{$res.last_modified|bit_long_date}</td>
 					<td>{$res.real_name}</td>
-					<td>{$res.meta|@implode:' => '}</td>
+					<td>{foreach from=$res.meta item=value key=name}{$name} &rarr; {$value}<br/>{/foreach}</td>
 				</tr>
 				{foreachelse}
 				<tr>

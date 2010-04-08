@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_meta/meta_lib.php,v 1.32 2009/10/01 14:17:02 wjames5 Exp $
+ * $Header: /cvsroot/bitweaver/_bit_meta/meta_lib.php,v 1.33 2010/04/08 16:16:28 spiderr Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -234,19 +234,30 @@ function meta_search( $pParamHash ) { // {{{
 	global $gBitDb;
 	$ret = array();
 	$bindVars = array();
+	$joinSql = '';
 	$havingSql = '';
 	$whereSql = '';
 
+	$i = 1;
 	if( !empty( $pParamHash['name'] ) ) {
 		foreach( $pParamHash['name'] as $name=>$value ) {
-			$whereSql .= ' AND `attribute`.`name`=? ';
+			$selectSql .= ", `attribute$i`.`name` AS `name$i`, `value$i`.`value` AS `value$i` ";
+			$joinSql .= "
+				INNER JOIN `".BIT_DB_PREFIX."meta_associations` as `meta$i` ON (`meta$i`.`content_id` = lc.`content_id` AND `meta$i`.`end` IS NULL)
+				INNER JOIN `".BIT_DB_PREFIX."meta_attributes` as `attribute$i` ON `meta$i`.`meta_attribute_id` = `attribute$i`.`meta_attribute_id`
+				INNER JOIN `".BIT_DB_PREFIX."meta_values` as `value$i` ON `meta$i`.`meta_value_id` = `value$i`.`meta_value_id`
+			 ";
+			$whereSql .= " AND `attribute$i`.`name`=? ";
 			$bindVars[] = $name;
 			if( !empty( $value ) ) {
-				$whereSql .= ' AND `value`.`value`=? ';
+				$whereSql .= " AND `value$i`.`value`=? ";
 				$bindVars[] = $value;
 			}
+			$i++;
 		}
 	}
+
+	$whereSql = preg_replace( '/^ AND /', ' WHERE ', $whereSql, 1 );
 
 	if( empty( $pParamHash['sort_mode'] ) ) {
 		$pParamHash['sort_mode'] = 'title_asc';
@@ -258,24 +269,24 @@ function meta_search( $pParamHash ) { // {{{
 	}
 
 		$query = "
-			SELECT lc.`content_id`, lc.`title`, lc.`last_modified`, `user`.`real_name`, `attribute`.`name`, `value`.`value`
-			FROM
-				`".BIT_DB_PREFIX."meta_associations` as `meta`
-				INNER JOIN `".BIT_DB_PREFIX."meta_attributes` as `attribute` ON `meta`.`meta_attribute_id` = `attribute`.`meta_attribute_id`
-				INNER JOIN `".BIT_DB_PREFIX."meta_values` as `value` ON `meta`.`meta_value_id` = `value`.`meta_value_id`
-				INNER JOIN `".BIT_DB_PREFIX."liberty_content` as lc ON `meta`.`content_id` = lc.`content_id`
+			SELECT lc.`content_id`, lc.`title`, lc.`last_modified`, `user`.`real_name` $selectSql
+			FROM `".BIT_DB_PREFIX."liberty_content` as lc
 				INNER JOIN `".BIT_DB_PREFIX."users_users` as `user` ON `user`.`user_id` = lc.`user_id`
-			WHERE `meta`.`end` IS NULL $whereSql
-			GROUP BY `meta`.`content_id`
+				$joinSql
+			$whereSql
 			$havingSql 
 			ORDER BY ". $gBitDb->convertSortmode( $pParamHash['sort_mode'] );
-
 		if( $result = $gBitDb->query( $query, $bindVars ) ) {
 			while( $row = $result->fetchRow() ) {
 				if( empty( $ret[$row['content_id']] ) ) {
 					$ret[$row['content_id']] = $row;
 				}
-				$ret[$row['content_id']]['meta'][$row['name']] = $row['value'];
+				foreach( $row as $key=>$value ) {
+					if( preg_match( '/^value/', $key ) ) {
+						$name = str_replace( 'value', 'name', $key );
+						$ret[$row['content_id']]['meta'][$row[$name]] = $value;
+					}
+				}
 			}
 		}
 
