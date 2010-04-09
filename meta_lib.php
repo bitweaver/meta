@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_meta/meta_lib.php,v 1.33 2010/04/08 16:16:28 spiderr Exp $
+ * $Header: /cvsroot/bitweaver/_bit_meta/meta_lib.php,v 1.34 2010/04/09 18:14:33 spiderr Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -239,8 +239,8 @@ function meta_search( $pParamHash ) { // {{{
 	$whereSql = '';
 
 	$i = 1;
-	if( !empty( $pParamHash['name'] ) ) {
-		foreach( $pParamHash['name'] as $name=>$value ) {
+	if( !empty( $pParamHash['search'] ) ) {
+		foreach( $pParamHash['search'] as $name=>$value ) {
 			$selectSql .= ", `attribute$i`.`name` AS `name$i`, `value$i`.`value` AS `value$i` ";
 			$joinSql .= "
 				INNER JOIN `".BIT_DB_PREFIX."meta_associations` as `meta$i` ON (`meta$i`.`content_id` = lc.`content_id` AND `meta$i`.`end` IS NULL)
@@ -250,8 +250,27 @@ function meta_search( $pParamHash ) { // {{{
 			$whereSql .= " AND `attribute$i`.`name`=? ";
 			$bindVars[] = $name;
 			if( !empty( $value ) ) {
-				$whereSql .= " AND `value$i`.`value`=? ";
-				$bindVars[] = $value;
+				if( is_array( $value ) ) {
+					$whereSql .= " AND (";
+					while( $v = array_pop( $value ) ) {
+						$whereSql .= " `value$i`.`value`=? ";
+						if( count( $value ) ) {
+							// we have more conditions to go
+							$whereSql .= " OR ";
+						}
+						$bindVars[] = $v;
+					}
+					$whereSql .= ")";
+				} else {
+					if( $value == 'none' ) {
+						$whereSql .= " AND `value$i` IS NULL ";
+					} elseif( $value == '*any*' ) {
+						// Do Nothing
+					} else {
+						$whereSql .= " AND `value$i`.`value`=? ";
+						$bindVars[] = $value;
+					}
+				}
 			}
 			$i++;
 		}
@@ -261,11 +280,6 @@ function meta_search( $pParamHash ) { // {{{
 
 	if( empty( $pParamHash['sort_mode'] ) ) {
 		$pParamHash['sort_mode'] = 'title_asc';
-	}
-
-	if( !empty( $pParamHash['conditions'] ) && count( $pParamHash['conditions'] ) > 0 ) {
-		$havingSql = " HAVING " . implode( ' AND ', $pParamHash['conditions']['sql'] );
-		$bindVars = array_merge( $bindVars, $pParamHash['conditions']['params']  );
 	}
 
 		$query = "
@@ -300,30 +314,10 @@ function meta_parse_plugin_params( $paramString ) {
 	$conditions = array();
 	foreach( $p as $value ) {
 		list( $key, $values ) = explode( '=', $value );
+
 		$values = explode( '|', $values );
-
-		$temp = array();
-
 		foreach( $values as $value ) {
-			if( $value == 'none' ) {
-				$temp[] = "COUNT( IF( `attribute`.`name` = ?, 'GOOD', NULL ) ) = 0";
-				$parameters[] = $key;
-				continue;
-			}
-
-			if( $value == 'any' ) {
-				$temp[] = "COUNT( IF( `attribute`.`name` LIKE ?, 'GOOD', NULL ) ) > 0";
-				$parameters[] = $key;
-				continue;
-			}
-
-			$temp[] = "COUNT( IF( `attribute`.`name` = ? AND `value`.`value` = ?, 'GOOD', NULL ) ) > 0";
-			$conditions['params'][] = $key;
-			$conditions['params'][] = $value;
-		}
-
-		if( count( $temp ) > 0 ) {
-			$conditions['sql'][] = "( " . implode( ' OR ', $temp ) . " )";
+			$conditions[$key][] = $value;
 		}
 	}
 	return $conditions;
@@ -335,7 +329,7 @@ function data_metasearch($data, $params) { // {{{
 		return tra( 'Missing parameter "param".' );
 	}
 		
-	$listHash['conditions'] = meta_parse_plugin_params( $params['param'] );
+	$listHash['search'] = meta_parse_plugin_params( $params['param'] );
 	$data = array();
 	if( $rows = meta_search( $listHash ) ) {
 		foreach( $rows as $row ) {
@@ -360,7 +354,7 @@ function data_metatable($data, $params) { // {{{
 		return tra( 'Missing parameter "param".' );
 	}
 		
-	$listHash['conditions'] = meta_parse_plugin_params( $params['param'] );
+	$listHash['search'] = meta_parse_plugin_params( $params['param'] );
 	$data = array();
 	if( $rows = meta_search( $listHash ) ) {
 		$columns = array( '-1'=>'Name' );
