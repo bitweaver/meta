@@ -4,6 +4,29 @@
 <div class="content">
 {form ipackage="meta" ifile="index.php"}
 	{jstabs tab="`$tab`"}
+		{jstab title="Results"}
+			<h1>{tr}Search Results{/tr}</h1>
+			<table class="clear data">
+				<tr>
+					<th>{tr}Title{/tr}</th>
+					<th>{tr}Last Modified{/tr}</th>
+					<th>{tr}Author{/tr}</th>
+					<th>{tr}Value{/tr}</th>
+				</tr>
+				{foreach from=$searchData key=k item=res}
+				<tr>
+					<td><a href="{$smarty.const.BIT_ROOT_URL}?content_id={$res.content_id}">{$res.title|escape}</a></td>
+					<td>{$res.last_modified|bit_long_date}</td>
+					<td>{$res.real_name}</td>
+					<td>{foreach from=$res.meta item=value key=name}{$name} &rarr; {$value}<br/>{/foreach}</td>
+				</tr>
+				{foreachelse}
+				<tr>
+					<td colspan="3">{tr}No results found. Choose different criteria.{/tr}</td>
+				</tr>
+				{/foreach}
+			</table>
+		{/jstab}
 		{jstab title="Search"}
 			{foreach from=$metaAttributes key=group item=attributes}
 				{if !($group eq '')}
@@ -34,28 +57,5 @@
 			</div>
 		{/jstab}
 	{/jstabs}
-		{if $searchData}
-			<h1>{tr}Search Results{/tr}</h1>
-			<table class="clear data">
-				<tr>
-					<th>{tr}Title{/tr}</th>
-					<th>{tr}Last Modified{/tr}</th>
-					<th>{tr}Author{/tr}</th>
-					<th>{tr}Value{/tr}</th>
-				</tr>
-				{foreach from=$searchData key=k item=res}
-				<tr>
-					<td><a href="{$smarty.const.BIT_ROOT_URL}?content_id={$res.content_id}">{$res.title|escape}</a></td>
-					<td>{$res.last_modified|bit_long_date}</td>
-					<td>{$res.real_name}</td>
-					<td>{foreach from=$res.meta item=value key=name}{$name} &rarr; {$value}<br/>{/foreach}</td>
-				</tr>
-				{foreachelse}
-				<tr>
-					<td colspan="3">{tr}No results found.{/tr}</td>
-				</tr>
-				{/foreach}
-			</table>
-		{/if}
 {/form}
 </div>
