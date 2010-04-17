@@ -78,4 +78,8 @@ $gBitInstaller->registerPreferences( META_PKG_NAME, array(
 	array( META_PKG_NAME, 'feature_listSamples', 'y' ),
 */
 ) );
-?>
+
+// Requirements
+$gBitInstaller->registerRequirements( META_PKG_NAME, array(
+    'liberty' => array( 'min' => '2.1.4' ),
+));
