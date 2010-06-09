@@ -1,4 +1,4 @@
-{* $Header: /cvsroot/bitweaver/_bit_meta/modules/mod_meta_placeholder.tpl,v 1.1 2006/02/24 00:51:58 lphuberdeau Exp $ *}
+{* $Header$ *}
 {strip}
 {if $gBitSystem->isPackageActive( 'meta' ) and count( $metaTables ) > 0}
 	{bitmodule title="$moduleTitle" name="meta_placeholder"}

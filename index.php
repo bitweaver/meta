@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_meta/index.php,v 1.14 2010/04/09 18:14:33 spiderr Exp $
+// $Header$
 // Copyright (c) 2004 bitweaver Sample
 // All Rights Reserved. See below for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See http://www.gnu.org/copyleft/lesser.html for details.
