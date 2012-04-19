@@ -15,10 +15,9 @@ $tables = array(
 		meta_attribute_id I4 NOTNULL,
 		meta_value_id I4 NOTNULL,
 		user_id I4 NOTNULL,
-		start I4  UNSIGNED NOTNULL,
-		end I4 UNSIGNED NULL
-		CONSTRAINT '
-			, CONSTRAINT `meta_associations_content_ref` FOREIGN KEY (`content_id`) REFERENCES `".BIT_DB_PREFIX."liberty_content`( `content_id` )
+		start_epoch I4  UNSIGNED NOTNULL,
+		end_epoch I4 UNSIGNED NULL
+		CONSTRAINT ' , CONSTRAINT `meta_associations_content_ref` FOREIGN KEY (`content_id`) REFERENCES `".BIT_DB_PREFIX."liberty_content`( `content_id` )
 			, CONSTRAINT `meta_associations_attribute_ref` FOREIGN KEY (`meta_attribute_id`) REFERENCES `".BIT_DB_PREFIX."meta_attributes`( `meta_attribute_id` )
 			, CONSTRAINT `meta_associations_value_ref` FOREIGN KEY (`meta_value_id`) REFERENCES `".BIT_DB_PREFIX."meta_values`( `meta_value_id` )
 			, CONSTRAINT `meta_associations_user_ref` FOREIGN KEY (`user_id`) REFERENCES `".BIT_DB_PREFIX."users_users`( `user_id` )'
