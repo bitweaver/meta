@@ -5,13 +5,13 @@
 {if $metaAction eq 'edit'}
 {form ipackage="meta" ifile="edit_attributes.php?action=edit&amp;id=`$metaId`"}
 	<h1>{tr}Rename Attribute{/tr}</h1>
-	<div class="row">
+	<div class="control-group">
 		{formlabel label="Name" for="name"}
 		{forminput}
 			<input type="text" name="name" id="name" value="{$metaName}"/>
 		{/forminput}
 	</div>
-	<div class="row submit">
+	<div class="control-group submit">
 		<input type="submit" name="edit_attribute" value="{tr}rename{/tr}" />
 	</div>
 {/form}
@@ -21,7 +21,7 @@
 	<p>
 	{tr}Do you really want to delete this attribute?{/tr} {$metaName}
 	</p>
-	<div class="row submit">
+	<div class="control-group submit">
 		<input type="submit" name="delete_attribute" value="{tr}Confirm{/tr}" />
 		<input type="submit" name="action" value="{tr}Cancel{/tr}" />
 	</div>
@@ -29,13 +29,13 @@
 {else}
 {form ipackage="meta" ifile="edit_attributes.php"}
 	<h1>{tr}New Attribute{/tr}</h1>
-	<div class="row">
+	<div class="control-group">
 		{formlabel label="Name" for="name"}
 		{forminput}
 			<input type="text" name="name" id="name"/>
 		{/forminput}
 	</div>
-	<div class="row submit">
+	<div class="control-group submit">
 		<input type="submit" name="add_attribute" value="{tr}add{/tr}" />
 	</div>
 {/form}
