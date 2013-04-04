@@ -252,16 +252,18 @@ function meta_search( $pParamHash ) { // {{{
 			$bindVars[] = $name;
 			if( !empty( $value ) ) {
 				if( is_array( $value ) ) {
-					$whereSql .= " AND (";
+					$valueSql = '';
 					while( $v = array_pop( $value ) ) {
-						$whereSql .= " `value$i`.`value`=? ";
+						$valueSql .= " `value$i`.`value`=? ";
 						if( count( $value ) ) {
 							// we have more conditions to go
-							$whereSql .= " OR ";
+							$valueSql .= " OR ";
 						}
 						$bindVars[] = $v;
 					}
-					$whereSql .= ")";
+					if( $valueSql ) {
+						$whereSql .= ' AND ('.$valueSql.')';
+					}
 				} else {
 					if( $value == 'none' ) {
 						$whereSql .= " AND `value$i` IS NULL ";
@@ -283,27 +285,27 @@ function meta_search( $pParamHash ) { // {{{
 		$pParamHash['sort_mode'] = 'title_asc';
 	}
 
-		$query = "
-			SELECT lc.`content_id`, lc.`title`, lc.`last_modified`, `user`.`real_name` $selectSql
-			FROM `".BIT_DB_PREFIX."liberty_content` as lc
-				INNER JOIN `".BIT_DB_PREFIX."users_users` as `user` ON `user`.`user_id` = lc.`user_id`
-				$joinSql
-			$whereSql
-			$havingSql 
-			ORDER BY ". $gBitDb->convertSortmode( $pParamHash['sort_mode'] );
-		if( $result = $gBitDb->query( $query, $bindVars ) ) {
-			while( $row = $result->fetchRow() ) {
-				if( empty( $ret[$row['content_id']] ) ) {
-					$ret[$row['content_id']] = $row;
-				}
-				foreach( $row as $key=>$value ) {
-					if( preg_match( '/^value/', $key ) ) {
-						$name = str_replace( 'value', 'name', $key );
-						$ret[$row['content_id']]['meta'][$row[$name]] = $value;
-					}
+	$query = "
+		SELECT lc.`content_id`, lc.`title`, lc.`last_modified`, `user`.`real_name` $selectSql
+		FROM `".BIT_DB_PREFIX."liberty_content` as lc
+			INNER JOIN `".BIT_DB_PREFIX."users_users` as `user` ON `user`.`user_id` = lc.`user_id`
+			$joinSql
+		$whereSql
+		$havingSql 
+		ORDER BY ". $gBitDb->convertSortmode( $pParamHash['sort_mode'] );
+	if( $result = $gBitDb->query( $query, $bindVars ) ) {
+		while( $row = $result->fetchRow() ) {
+			if( empty( $ret[$row['content_id']] ) ) {
+				$ret[$row['content_id']] = $row;
+			}
+			foreach( $row as $key=>$value ) {
+				if( preg_match( '/^value/', $key ) ) {
+					$name = str_replace( 'value', 'name', $key );
+					$ret[$row['content_id']]['meta'][$row[$name]] = $value;
 				}
 			}
 		}
+	}
 
 	return $ret;
 } // }}} 
