@@ -12,7 +12,7 @@
 		{/forminput}
 	</div>
 	<div class="control-group submit">
-		<input type="submit" name="edit_attribute" value="{tr}rename{/tr}" />
+		<input type="submit" class="btn" name="edit_attribute" value="{tr}rename{/tr}" />
 	</div>
 {/form}
 {elseif $metaAction eq 'delete'}
@@ -22,8 +22,8 @@
 	{tr}Do you really want to delete this attribute?{/tr} {$metaName}
 	</p>
 	<div class="control-group submit">
-		<input type="submit" name="delete_attribute" value="{tr}Confirm{/tr}" />
-		<input type="submit" name="action" value="{tr}Cancel{/tr}" />
+		<input type="submit" class="btn" name="delete_attribute" value="{tr}Confirm{/tr}" />
+		<input type="submit" class="btn" name="action" value="{tr}Cancel{/tr}" />
 	</div>
 {/form}
 {else}
@@ -36,7 +36,7 @@
 		{/forminput}
 	</div>
 	<div class="control-group submit">
-		<input type="submit" name="add_attribute" value="{tr}add{/tr}" />
+		<input type="submit" class="btn" name="add_attribute" value="{tr}add{/tr}" />
 	</div>
 {/form}
 {/if}
