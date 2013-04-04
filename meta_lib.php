@@ -413,7 +413,7 @@ function data_metatable($data, $params) { // {{{
 	}
 
 	if( count( $data ) > 0 ) {
-		$ret = '<table class="bittable"><tr><th class="bitbar">'.implode( '</th><th class="bitbar">', $columns ).'</th></tr><tr>' . implode( "</tr><tr>", $data ) . '</tr></table>';
+		$ret = '<table class="table"><tr><th class="bitbar">'.implode( '</th><th class="bitbar">', $columns ).'</th></tr><tr>' . implode( "</tr><tr>", $data ) . '</tr></table>';
 	} else {
 		$ret = tra( 'No results found.' );
 	}

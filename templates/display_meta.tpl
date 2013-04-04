@@ -1,5 +1,5 @@
 {if count($metaInfo) > 0}
-<table class="data meta">
+<table class="table data meta">
 	{foreach from=$metaInfo key=group item=elements}
 		{if !($group eq '')}
 		<tr>
