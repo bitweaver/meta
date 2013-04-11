@@ -13,5 +13,5 @@
  * @subpackage modules
  */
 global $metaTables, $gBitSmarty;
-$gBitSmarty->assign_by_ref( 'metaTables', $metaTables );
+$_template->tpl_vars['metaTables'] = new Smarty_variable( $metaTables );
 ?>
