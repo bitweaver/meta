@@ -396,7 +396,7 @@ function data_metatable($data, $params) { // {{{
 			$sql = "SELECT * 
 					FROM `".BIT_DB_PREFIX."meta_associations` metaa
 						INNER JOIN `".BIT_DB_PREFIX."meta_values` metav ON( metaa.`meta_value_id`=metav.`meta_value_id`)
-					WHERE metaa.`content_id`=? AND `".BIT_DB_PREFIX."metaa`.`end` IS NULL $whereSql ";
+					WHERE metaa.`content_id`=? AND `metaa`.`end` IS NULL $whereSql ";
 			if( $vals = $gBitDb->getAll( $sql, $bindVars ) ) {
 				foreach( $vals as $v ) {
 					$rowData[$v['meta_attribute_id']] = $v['value'];
