@@ -350,26 +350,33 @@ function data_metasearch($data, $params) { // {{{
 	return $ret;
 } // }}} 
 
-function data_metatable($data, $params) { // {{{ 
+function data_metatable( $data, $params, $pFormat='html' ) { // {{{ 
 	global $gBitDb;
 	$whereSql = '';
 	if( !isset( $params['param'] ) ) {
 		return tra( 'Missing parameter "param".' );
 	}
-		
 	$listHash['search'] = meta_parse_plugin_params( $params['param'] );
 	$data = array();
 	if( $rows = meta_search( $listHash ) ) {
-		$columns = array( '-1'=>'Name' );
+		switch( $pFormat ) {
+			case 'csv':
+				$columns = array( '-1'=> tra( 'Name' ) );
+				break;
+			default:
+				$columns = array( '-1'=>'<a href="'.META_PKG_URL.'export.php?'.http_build_query( $params ).'"><i class="icon-table"></i></a> '.tra( 'Name' ) );
+				break;
+		}
+
+		$groupSql = '';
 		if( !empty( $params['columns'] ) ) {
 			$colVars = array();
-			$groupSql = '';
 			$p = explode( ',', $params['columns'] );
 			$p = array_map( 'trim', $p );
 
 			foreach( $p as $value ) {
 				if( $valueId = meta_get_attribute_id( $value ) ) {
-					$columns[$valueId] = $value;
+					$columns[$valueId] = ucwords( $value );
 					if( !empty( $groupSql ) ) {
 						$groupSql .= ' OR ';
 					}
@@ -388,7 +395,17 @@ function data_metatable($data, $params) { // {{{
 			$dataString = '';
 			$whereSql = '';
 			$rowClass = ($rowCount++ % 2) ? 'odd' : 'even';
-			$rowData[-1] = '<a href="'.BIT_ROOT_URL.'index.php?content_id='.$row['content_id'].'">'.$row['title'].'</a>';
+
+			switch( $pFormat ) {
+				case 'csv':
+					$rowData[-1] = $row['title'];
+					break;
+				default:
+					$rowData[-1] = '<a href="'.BIT_ROOT_URL.'index.php?content_id='.$row['content_id'].'">'.$row['title'].'</a>';
+					break;
+			}
+
+
 			if( $groupSql ) {
 				$bindVars = array_merge( $bindVars, $colVars );
 				$whereSql .= " AND ( $groupSql ) ";
@@ -407,15 +424,30 @@ function data_metatable($data, $params) { // {{{
 						LEFT OUTER JOIN `".BIT_DB_PREFIX."liberty_content_data` lcds ON( lc.`content_id` = lcds.`content_id` AND lcds.`data_type` = ? )
 					WHERE lc.`content_id`=?";
 			$contentData = current( $gBitDb->getAssoc( $sql, array( 'summary', $row['content_id'] ) ) );
+
 			foreach( $columns AS $valueId=>$value ) {
-				$dataString .= '<td class=""'.$rowClass.'">'.(!empty( $rowData[$valueId] ) ? $rowData[$valueId] : (!empty( $contentData[$valueId] ) ? $contentData[$valueId] : '&nbsp;')).'</td>';
+				switch( $pFormat ) {
+					case 'csv':
+						$dataString[] .= (!empty( $rowData[$valueId] ) ? $rowData[$valueId] : (!empty( $contentData[$valueId] ) ? $contentData[$valueId] : ''));
+						break;
+					default:
+						$dataString .= '<td class="'.$rowClass.'">'.(!empty( $rowData[$valueId] ) ? $rowData[$valueId] : (!empty( $contentData[$valueId] ) ? $contentData[$valueId] : '&nbsp;')).'</td>';
+						break;
+				}
 			}
 			$data[] = $dataString;
 		}
 	}
 
 	if( count( $data ) > 0 ) {
-		$ret = '<table class="table"><tr><th class="bitbar">'.implode( '</th><th class="bitbar">', $columns ).'</th></tr><tr>' . implode( "</tr><tr>", $data ) . '</tr></table>';
+		switch( $pFormat ) {
+			case 'csv':
+				$ret = array_merge( array( $columns ), $data );
+				break;
+			default:
+				$ret = '<table class="table"><tr><th>'.implode( '</th><th class="bitbar">', $columns ).'</th></tr><tr>' . implode( "</tr><tr>", $data ) . '</tr></table>';
+				break;
+		}
 	} else {
 		$ret = tra( 'No results found.' );
 	}
