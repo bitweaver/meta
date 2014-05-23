@@ -53,7 +53,7 @@
 			</p>
 			{/foreach}
 			<div class="submit">
-				<input type="submit" class="btn" name="search" value="{tr}Search{/tr}"/>
+				<input type="submit" class="btn btn-default" name="search" value="{tr}Search{/tr}"/>
 			</div>
 		{/jstab}
 	{/jstabs}
