@@ -7,7 +7,7 @@
 			<h2>{$group}</h2>
 		{/if}
 		{foreach from=$attributes key=attribute_id item=data}
-		<div class="control-group">
+		<div class="form-group">
 			{formlabel label="`$data.name`" for="`$attribute_id`"}
 			{forminput}
 				<select name="metatt[{$attribute_id}]" id="metattmenu">

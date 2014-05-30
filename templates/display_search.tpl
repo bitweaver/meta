@@ -34,7 +34,7 @@
 				{/if}
 				{foreach from=$attributes key=attribute_id item=data}
 				{assign var="metaName" value=$data.name}
-				<div class="control-group">
+				<div class="form-group">
 					{formlabel label="`$data.name`" for="`$attribute_id`"}
 					{forminput}
 						<select name="metatt[{$metaName|escape}]">
