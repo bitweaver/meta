@@ -5,18 +5,19 @@
 {form ipackage="meta" ifile="index.php"}
 	{jstabs tab="`$tab`"}
 		{jstab title="Results"}
-			<h1>{tr}Search Results{/tr}</h1>
-			<table class="clear data">
+			{foreach from=$searchData key=groupKey item=groupResults}
+			<h2>{$groupKey|escape}</h2>
+			<table class="table data">
 				<tr>
 					<th>{tr}Title{/tr}</th>
 					<th>{tr}Last Modified{/tr}</th>
 					<th>{tr}Author{/tr}</th>
 					<th>{tr}Value{/tr}</th>
 				</tr>
-				{foreach from=$searchData key=k item=res}
+				{foreach from=$groupResults key=k item=res}
 				<tr>
 					<td><a href="{$smarty.const.BIT_ROOT_URL}?content_id={$res.content_id}">{$res.title|escape}</a></td>
-					<td>{$res.last_modified|bit_long_date}</td>
+					<td>{$res.last_modified|bit_short_date}</td>
 					<td>{$res.real_name}</td>
 					<td>{foreach from=$res.meta item=value key=name}{$name} &rarr; {$value}<br/>{/foreach}</td>
 				</tr>
@@ -26,6 +27,7 @@
 				</tr>
 				{/foreach}
 			</table>
+			{/foreach}
 		{/jstab}
 		{jstab title="Search"}
 			{foreach from=$metaAttributes key=group item=attributes}

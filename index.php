@@ -23,7 +23,14 @@ if( isset( $_REQUEST['metatt'] ) ) {
 			$listHash['search'][$key] = $value;
 		}
 	}
-	$gBitSmarty->assign_by_ref( 'searchData', meta_search( $listHash ) );
+
+	$searchResults = meta_search( $listHash );
+	foreach( array_keys( $searchResults ) as $key ) {
+		$groupKey = implode( $searchResults[$key]['meta'], ',' );
+		$groupedResults[$groupKey][$key] = $searchResults[$key];
+	}
+	ksort( $groupedResults );
+	$gBitSmarty->assign_by_ref( 'searchData', $groupedResults );
 	$gBitSmarty->assign( 'tab', 2 );
 } else {
 	$gBitSmarty->assign( 'tab', 0 );
