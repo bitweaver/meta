@@ -444,7 +444,13 @@ $pattern = '~(.+)(&&|\|\|)(.+)~';
 		// sort if necessary
 		if( !empty( $params['sort'] ) && $sortKey = array_search( $params['sort'], $columns ) ) {
 			uasort ( $rows, function ($a, $b) use ($sortKey) {
-				return strnatcmp( $a['meta'][$sortKey], $b['meta'][$sortKey] ); // or other function/code
+				if( $a['meta'][$sortKey] == $b['meta'][$sortKey] ) {
+					// if equal, sort based on the title
+					$ret = strnatcmp( $a['meta'][-1], $b['meta'][-1] );
+				} else {
+					$ret = strnatcmp( $a['meta'][$sortKey], $b['meta'][$sortKey] ); // or other function/code
+				}
+				return $ret;
 			} );
 		}
 
