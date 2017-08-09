@@ -250,6 +250,7 @@ function meta_search( $pParamHash ) { // {{{
 			 ";
 			$whereSql .= " AND `attribute$i`.`name`=? ";
 			$bindVars[] = $name;
+
 			if( !empty( $value ) ) {
 				if( is_array( $value ) ) {
 					$valueSql = '';
@@ -353,10 +354,24 @@ function data_metasearch($data, $params) { // {{{
 function data_metatable( $data, $params, $pFormat='html' ) { // {{{ 
 	global $gBitDb;
 	$whereSql = '';
-	if( !isset( $params['param'] ) ) {
-		return tra( 'Missing parameter "param".' );
+	$listHash['search'] = array();
+	if( isset( $params['param'] ) ) {
+		$listHash['search'] = meta_parse_plugin_params( $params['param'] );
+	} elseif( isset( $params['query'] ) ) {
+$pattern = '~(.+)(&&|\|\|)(.+)~';
+		if( $parameters = preg_split($pattern, $params['query'], -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE) ) {
+			foreach( $parameters as $param ) {
+				if( $param == '&&' ) {
+				} else {
+					$keyValue = meta_parse_plugin_params( trim( $param ) );
+					$listHash['search'][key($keyValue)] = current( $keyValue );
+				}
+			}
+		}
 	}
-	$listHash['search'] = meta_parse_plugin_params( $params['param'] );
+	if( empty( $listHash['search'] ) ) {
+		return tra( 'Missing parameter "param" or "query".' );
+	}
 	$data = array();
 	if( $rows = meta_search( $listHash ) ) {
 		switch( $pFormat ) {
@@ -389,19 +404,18 @@ function data_metatable( $data, $params, $pFormat='html' ) { // {{{
 		}
 
 		$rowCount = 1;
-		foreach( $rows as $row ) {
+
+		// Populate each row with specified columns
+		foreach( $rows as &$row ) {
 			$bindVars = array( $row['content_id'] );
-			$rowData = array();
-			$dataString = '';
 			$whereSql = '';
-			$rowClass = ($rowCount++ % 2) ? 'odd' : 'even';
 
 			switch( $pFormat ) {
 				case 'csv':
-					$rowData[-1] = $row['title'];
+					$row['meta'][-1] = $row['title'];
 					break;
 				default:
-					$rowData[-1] = '<a href="'.BIT_ROOT_URL.'index.php?content_id='.$row['content_id'].'">'.$row['title'].'</a>';
+					$row['meta'][-1] = '<a href="'.BIT_ROOT_URL.'index.php?content_id='.$row['content_id'].'">'.$row['title'].'</a>';
 					break;
 			}
 
@@ -416,22 +430,35 @@ function data_metatable( $data, $params, $pFormat='html' ) { // {{{
 					WHERE metaa.`content_id`=? AND `metaa`.`end` IS NULL $whereSql ";
 			if( $vals = $gBitDb->getAll( $sql, $bindVars ) ) {
 				foreach( $vals as $v ) {
-					$rowData[$v['meta_attribute_id']] = $v['value'];
+					$row['meta'][$v['meta_attribute_id']] = $v['value'];
 				}
 			}
 			$sql = "SELECT lc.*, lcds.`data` AS `summary` 
 					FROM `".BIT_DB_PREFIX."liberty_content` lc 
 						LEFT OUTER JOIN `".BIT_DB_PREFIX."liberty_content_data` lcds ON( lc.`content_id` = lcds.`content_id` AND lcds.`data_type` = ? )
 					WHERE lc.`content_id`=?";
-			$contentData = current( $gBitDb->getAssoc( $sql, array( 'summary', $row['content_id'] ) ) );
+			$row['content'] = current( $gBitDb->getAssoc( $sql, array( 'summary', $row['content_id'] ) ) );
 
+		}
+
+		// sort if necessary
+		if( !empty( $params['sort'] ) && $sortKey = array_search( $params['sort'], $columns ) ) {
+			uasort ( $rows, function ($a, $b) use ($sortKey) {
+				return strnatcmp( $a['meta'][$sortKey], $b['meta'][$sortKey] ); // or other function/code
+			} );
+		}
+
+		// generate output
+		foreach( $rows as $row ) {
+			$dataString = '';
+			$rowClass = ($rowCount++ % 2) ? 'odd' : 'even';
 			foreach( $columns AS $valueId=>$value ) {
 				switch( $pFormat ) {
 					case 'csv':
-						$dataString[] .= (!empty( $rowData[$valueId] ) ? $rowData[$valueId] : (!empty( $contentData[$valueId] ) ? $contentData[$valueId] : ''));
+						$dataString[] .= (!empty( $row['meta'][$valueId] ) ? $row['meta'][$valueId] : (!empty( $row['content'][$valueId] ) ? $row['content'][$valueId] : ''));
 						break;
 					default:
-						$dataString .= '<td class="'.$rowClass.'">'.(!empty( $rowData[$valueId] ) ? $rowData[$valueId] : (!empty( $contentData[$valueId] ) ? $contentData[$valueId] : '&nbsp;')).'</td>';
+						$dataString .= '<td class="'.$rowClass.'">'.(!empty( $row['meta'][$valueId] ) ? $row['meta'][$valueId] : (!empty( $row['content'][$valueId] ) ? $row['content'][$valueId] : '&nbsp;')).'</td>';
 						break;
 				}
 			}
