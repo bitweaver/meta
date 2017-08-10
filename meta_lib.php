@@ -443,7 +443,7 @@ $pattern = '~(.+)(&&|\|\|)(.+)~';
 
 		// sort if necessary
 		if( !empty( $params['sort'] ) && $sortKey = array_search( $params['sort'], $columns ) ) {
-			uasort ( $rows, function ($a, $b) use ($sortKey) {
+			usort ( $rows, function ($a, $b) use ($sortKey) {
 				if( $a['meta'][$sortKey] == $b['meta'][$sortKey] ) {
 					// if equal, sort based on the title
 					$ret = strnatcmp( $a['meta'][-1], $b['meta'][-1] );
@@ -453,9 +453,8 @@ $pattern = '~(.+)(&&|\|\|)(.+)~';
 				return $ret;
 			} );
 		}
-
 		// generate output
-		foreach( $rows as $row ) {
+		foreach( $rows as &$row ) {
 			$dataString = '';
 			$rowClass = ($rowCount++ % 2) ? 'odd' : 'even';
 			foreach( $columns AS $valueId=>$value ) {
