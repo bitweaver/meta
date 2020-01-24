@@ -2,7 +2,7 @@
 	<h1>{tr}Meta Search{/tr}</h1>
 </div>
 <div class="content">
-{form ipackage="meta" ifile="index.php"}
+{form ipackage="meta" method="get"}
 	{jstabs tab="`$tab`"}
 		{jstab title="Results"}
 			{foreach from=$searchData key=groupKey item=groupResults}
