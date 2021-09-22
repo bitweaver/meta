@@ -9,7 +9,7 @@
  * @package meta
  */
 
-require_once( '../kernel/setup_inc.php' );
+require_once( '../kernel/includes/setup_inc.php' );
 
 // Is package installed and enabled
 $gBitSystem->verifyPackage( 'meta' );

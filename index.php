@@ -5,8 +5,8 @@
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See http://www.gnu.org/copyleft/lesser.html for details.
 
 // Initialization
-require_once( '../kernel/setup_inc.php' );
-require_once 'meta_lib.php';
+require_once( '../kernel/includes/setup_inc.php' );
+require_once META_PKG_INCLUDE_PATH.'meta_lib.php';
 
 // Is package installed and enabled
 $gBitSystem->verifyPackage( 'meta' );
