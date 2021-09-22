@@ -145,7 +145,7 @@ function meta_content_edit( &$pContent, &$pParamHash ) { // {{{
 	global $gBitSmarty, $gMetaDbCacheTime;
 	
 	$gMetaDbCacheTime = BIT_QUERY_CACHE_CLEAR;
-
+bt();
 	$gBitSmarty->assign( 'metaAttributes', meta_get_possible_values( $pContent->mContentId ) );
 } // }}} 
 
@@ -199,10 +199,10 @@ function meta_content_preview( &$pContent, &$pParamHash ) { // {{{
 					}
 			}
 		}
-	}
 
-	$gBitSmarty->assign( 'metaAttributes', $attributes );
-	$gBitSmarty->assign( 'metaAttributesOther', $_POST['metatt_other'] );
+		$gBitSmarty->assign( 'metaAttributes', $attributes );
+		$gBitSmarty->assign( 'metaAttributesOther', $_POST['metatt_other'] );
+	}
 
 } // }}} 
 
