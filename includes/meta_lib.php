@@ -22,7 +22,10 @@ define( 'PLUGIN_GUID_METADATA', 'datametadata' );
 
 global $gBitSystem, $gMetaDbCacheTime;
 
-$gMetaDbCacheTime = ($gBitSystem->isRefreshRequest() ? BIT_QUERY_CACHE_CLEAR : BIT_QUERY_CACHE_TIME);
+$gMetaDbCacheTime = ($gBitSystem->isRefreshRequest() || !empty( $_SESSION['meta_refresh'] ) ? BIT_QUERY_CACHE_CLEAR : BIT_QUERY_CACHE_TIME);
+if( isset(  $_SESSION['meta_refresh'] ) ) {
+	unset( $_SESSION['meta_refresh'] );
+}
 
 function meta_placeholder_present() { // {{{ 
 	global $gBitThemes;
@@ -61,7 +64,7 @@ function meta_get_possible_values( $content_id = null, $other = true ) { // {{{
 		`".BIT_DB_PREFIX."meta_attributes` as `att`
 		LEFT JOIN `".BIT_DB_PREFIX."meta_associations` as `asso` ON `asso`.`meta_attribute_id` = `att`.`meta_attribute_id`
 		LEFT JOIN `".BIT_DB_PREFIX."meta_values` as `val` ON `asso`.`meta_value_id` = `val`.`meta_value_id`
-	ORDER BY `name`, `value`" );
+	ORDER BY `name`, `value`", array(), BIT_QUERY_DEFAULT, BIT_QUERY_DEFAULT, $gMetaDbCacheTime );
 
 	foreach( $result->getRows() as $row ) {
 		$att = $row['meta_attribute_id'];
@@ -139,7 +142,9 @@ function meta_content_display( &$pContent, &$pParamHash ) { // {{{
 } // }}} 
 
 function meta_content_edit( &$pContent, &$pParamHash ) { // {{{ 
-	global $gBitSmarty;
+	global $gBitSmarty, $gMetaDbCacheTime;
+	
+	$gMetaDbCacheTime = BIT_QUERY_CACHE_CLEAR;
 
 	$gBitSmarty->assign( 'metaAttributes', meta_get_possible_values( $pContent->mContentId ) );
 } // }}} 
@@ -148,6 +153,10 @@ function meta_get_attribute_id( $pAttributeName ) { // {{{
 	global $gBitDb, $gMetaDbCacheTime;
 	return $gBitDb->getOne( "SELECT `meta_attribute_id` FROM `".BIT_DB_PREFIX."meta_attributes` WHERE `name` = ?", array( $pAttributeName ), NULL, NULL, $gMetaDbCacheTime );
 } // }}} 
+
+function meta_set_refresh() {
+	$_SESSION['meta_refresh'] = TRUE;
+}
 
 function meta_get_value_id( $value ) { // {{{ 
 	global $gBitUser, $gBitDb, $gMetaDbCacheTime;
@@ -165,6 +174,7 @@ function meta_get_value_id( $value ) { // {{{
 			$gMetaDbCacheTime = 0;
 			$id = $gBitDb->genID( 'meta_value_id_seq' );
 			$gBitDb->query( "INSERT INTO `".BIT_DB_PREFIX."meta_values` (`meta_value_id`, `value`) VALUES( ?, ? )", array( $id, $value ) );
+			meta_set_refresh();
 			$ret = $id;
 		}
 	}
@@ -199,6 +209,8 @@ function meta_content_preview( &$pContent, &$pParamHash ) { // {{{
 function meta_content_store( &$pContent, &$pParamHash ) { // {{{ 
 	global $gBitUser, $gBitDb, $gMetaDbCacheTime;
 
+	$gMetaDbCacheTime = BIT_QUERY_CACHE_CLEAR;
+
 	if( !$pContent->hasUserPermission( 'p_assign_meta' ) )
 		return;
 
@@ -209,7 +221,7 @@ function meta_content_store( &$pContent, &$pParamHash ) { // {{{
 
 	$now = time();
 
-	$selected = $gBitDb->getAssoc( "SELECT `meta_attribute_id`, `meta_value_id` FROM `".BIT_DB_PREFIX."meta_associations` WHERE `end` IS NULL AND `content_id` = ?", array( $pContent->mContentId ) );
+	$selected = $gBitDb->getAssoc( "SELECT `meta_attribute_id`, `meta_value_id` FROM `".BIT_DB_PREFIX."meta_associations` WHERE `end` IS NULL AND `content_id` = ?", array( $pContent->mContentId ), FALSE, FALSE, $gMetaDbCacheTime );
 
 	foreach( $pParamHash['metatt'] as $att_id => $value ) {
 		if( !empty( $pParamHash['metatt_other'][$att_id] ) ) {
@@ -225,13 +237,17 @@ function meta_content_store( &$pContent, &$pParamHash ) { // {{{
 			$gBitDb->query( "INSERT INTO `".BIT_DB_PREFIX."meta_associations` ( `content_id`, `meta_attribute_id`, `meta_value_id`, `user_id`, `start` ) VALUES( ?, ?, ?, ?, ? )", array( $pContent->mContentId, $att_id, $value, $gBitUser->mUserId, $now ) );
 		}
 	}
+	meta_set_refresh();
 
 } // }}} 
 
 function meta_content_expunge( &$pContent, &$pParamHash ) { // {{{ 
-	global $gBitDb;
+	global $gBitDb, $gMetaDbCacheTime;
+
+	$gMetaDbCacheTime = BIT_QUERY_CACHE_CLEAR;
 
 	$gBitDb->query( "DELETE FROM `".BIT_DB_PREFIX."meta_associations` WHERE `content_id` = ?", array( $pParamHash->mContentId ) );
+	meta_set_refresh();
 
 } // }}} 
 
