@@ -17,7 +17,7 @@ $gBitSystem->verifyPackage( 'meta' );
 // Now check permissions to access this page
 $gBitSystem->verifyPermission( 'p_view_meta' );
 
-require_once( META_PKG_PATH.'meta_lib.php' );
+require_once META_PKG_INCLUDE_PATH.'meta_lib.php';
 
 $data = data_metatable( '', $_REQUEST, 'csv' );
 
