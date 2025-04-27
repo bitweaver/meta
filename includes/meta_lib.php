@@ -342,7 +342,7 @@ function meta_parse_plugin_params( $paramString ) {
 
 	$conditions = array();
 	foreach( $p as $value ) {
-		list( $key, $values ) = explode( '=', $value );
+		list( $key, $values ) = array_pad( explode( '=', $value ), 2, "");
 
 		$values = explode( '|', $values );
 		foreach( $values as $value ) {
@@ -469,11 +469,13 @@ $pattern = '~(.+)(&&|\|\|)(.+)~';
 		// sort if necessary
 		if( !empty( $params['sort'] ) && $sortKey = array_search( $params['sort'], $columns ) ) {
 			usort ( $rows, function ($a, $b) use ($sortKey) {
-				if( $a['meta'][$sortKey] == $b['meta'][$sortKey] ) {
+				if( empty( $a['meta'][$sortKey] ) || empty( $b['meta'][$sortKey] ) ) {
+					$ret = empty( $a['meta'][$sortKey] ) ? -1 : (empty( $b['meta'][$sortKey] ) ? 1 : 0 );
+				} elseif( $a['meta'][$sortKey] == $b['meta'][$sortKey] ) {
 					// if equal, sort based on the title
-					$ret = strnatcmp( $a['meta'][-1], $b['meta'][-1] );
+					$ret = strnatcmp( $a['meta'][-1] ?? '', $b['meta'][-1] ?? '' );
 				} else {
-					$ret = strnatcmp( $a['meta'][$sortKey], $b['meta'][$sortKey] ); // or other function/code
+					$ret = strnatcmp( $a['meta'][$sortKey] ?? '', $b['meta'][$sortKey] ?? '' ); // or other function/code
 				}
 				return $ret;
 			} );
