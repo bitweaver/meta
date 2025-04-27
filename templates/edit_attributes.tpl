@@ -27,17 +27,14 @@
 	</div>
 {/form}
 {else}
-{form ipackage="meta" ifile="edit_attributes.php"}
-	<h1>{tr}New Attribute{/tr}</h1>
+{form class="form-inline" ipackage="meta" ifile="edit_attributes.php"}
+	<fiedset>
 	<div class="form-group">
-		{formlabel label="Name" for="name"}
-		{forminput}
-			<input type="text" name="name" id="name"/>
-		{/forminput}
+		{formlabel label="New Attribute" for="name"}
+		<input class="form-control" type="text" name="name" id="name"/>
 	</div>
-	<div class="form-group submit">
-		<input type="submit" class="btn btn-default" name="add_attribute" value="{tr}add{/tr}" />
-	</div>
+		<input type="submit" class="btn btn-default" name="add_attribute" value="{tr}Add{/tr}" />
+	</fieldset>
 {/form}
 {/if}
 <table class="clear data">
@@ -53,11 +50,11 @@
 		<td>{$data.asso}</td>
 		<td>{$data.val}</td>
 		<td>
-			<a href="edit_attributes.php?action=edit&amp;id={$data.id}">
-				{biticon ipackage=liberty iname=edit iexplain="rename"}
+			<a class="icon" href="edit_attributes.php?action=edit&amp;id={$data.id}">
+				{booticon iname="icon-pencil" iexplain="rename"}
 			</a>
-			<a href="edit_attributes.php?action=delete&amp;id={$data.id}">
-				{biticon ipackage=liberty iname=delete iexplain="delete"}
+			<a class="icon" href="edit_attributes.php?action=delete&amp;id={$data.id}">
+				{booticon iname="icon-trash" iexplain="delete"}
 			</a>
 		</td>
 	</tr>
