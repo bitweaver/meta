@@ -1,4 +1,4 @@
-{if count($metaInfo) > 0}
+{if !empty($metaInfo) > 0}
 <div class="meta well pull-right nopadding">
 <table class="table data meta">
 	{foreach from=$metaInfo key=group item=elements}
