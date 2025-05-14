@@ -1,6 +1,6 @@
 {* $Header$ *}
 {strip}
-{if $gBitSystem->isPackageActive( 'meta' ) && count( $metaTables ) > 0}
+{if $gBitSystem->isPackageActive( 'meta' ) && !empty( $metaTables ) > 0}
 	{bitmodule title="$moduleTitle" name="meta_placeholder"}
 		{foreach from=$metaTables key=title item=groups}
 			<table class="table metatable data">
