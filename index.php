@@ -30,7 +30,7 @@ if( isset( $_REQUEST['metatt'] ) ) {
 		$groupedResults[$groupKey][$key] = $searchResults[$key];
 	}
 	ksort( $groupedResults );
-	$gBitSmarty->assign_by_ref( 'searchData', $groupedResults );
+	$gBitSmarty->assignByRef( 'searchData', $groupedResults );
 	$gBitSmarty->assign( 'tab', 2 );
 } else {
 	$gBitSmarty->assign( 'tab', 0 );
