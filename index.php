@@ -26,7 +26,7 @@ if( isset( $_REQUEST['metatt'] ) ) {
 
 	$searchResults = meta_search( $listHash );
 	foreach( array_keys( $searchResults ) as $key ) {
-		$groupKey = implode( $searchResults[$key]['meta'], ',' );
+		$groupKey = implode( ',', $searchResults[$key]['meta'] );
 		$groupedResults[$groupKey][$key] = $searchResults[$key];
 	}
 	ksort( $groupedResults );
