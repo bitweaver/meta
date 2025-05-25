@@ -13,7 +13,7 @@
 					{/if}
 					{foreach from=$attributes key=attribute_id item=data}
 					{assign var="metaName" value=$data.name}
-					<div class="form-group">
+					<div class="form-group {if !empty($smarty.request.metatt.$metaName)}has-warning{/if}">
 						{formlabel label="`$data.name`" for="`$attribute_id`"}
 						{forminput}
 							<select name="metatt[{$metaName|escape}]">
