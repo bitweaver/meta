@@ -25,10 +25,12 @@ if( isset( $_REQUEST['metatt'] ) ) {
 	}
 
 	$searchResults = meta_search( $listHash );
+	$groupedResults = array();
 	foreach( array_keys( $searchResults ) as $key ) {
 		$groupKey = implode( ',', $searchResults[$key]['meta'] );
 		$groupedResults[$groupKey][$key] = $searchResults[$key];
 	}
+
 	ksort( $groupedResults );
 	$gBitSmarty->assignByRef( 'searchData', $groupedResults );
 	$gBitSmarty->assign( 'tab', 2 );
