@@ -404,7 +404,7 @@ $pattern = '~(.+)(&&|\|\|)(.+)~';
 				$columns = array( '-1'=> tra( 'Name' ) );
 				break;
 			default:
-				$columns = array( '-1'=>'<a href="'.META_PKG_URL.'export.php?'.http_build_query( $params ).'"><i class="icon-table"></i></a> '.tra( 'Name' ) );
+				$columns = array( '-1'=>'<a href="'.META_PKG_URL.'export.php?'.http_build_query( $params ).'"><span class="badge"><i class="fa fa-table"></i> CSV</span></a> '.tra( 'Name' ) );
 				break;
 		}
 
