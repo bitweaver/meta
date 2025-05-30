@@ -397,7 +397,6 @@ $pattern = '~(.+)(&&|\|\|)(.+)~';
 	if( empty( $listHash['search'] ) ) {
 		return tra( 'Missing parameter "param" or "query".' );
 	}
-	$data = array();
 	if( $rows = meta_search( $listHash ) ) {
 		switch( $pFormat ) {
 			case 'csv':
@@ -480,14 +479,18 @@ $pattern = '~(.+)(&&|\|\|)(.+)~';
 				return $ret;
 			} );
 		}
+
+		$data = array();
+		$dataHash = array();
 		// generate output
 		foreach( $rows as &$row ) {
 			$dataString = '';
+			$dataRow = array();
 			$rowClass = ($rowCount++ % 2) ? 'odd' : 'even';
 			foreach( $columns AS $valueId=>$value ) {
 				switch( $pFormat ) {
 					case 'csv':
-						$dataString[] .= (!empty( $row['meta'][$valueId] ) ? $row['meta'][$valueId] : (!empty( $row['content'][$valueId] ) ? $row['content'][$valueId] : ''));
+						$dataRow[] = (!empty( $row['meta'][$valueId] ) ? $row['meta'][$valueId] : (!empty( $row['content'][$valueId] ) ? $row['content'][$valueId] : ''));
 						break;
 					default:
 						$dataString .= '<td class="'.$rowClass.'">'.(!empty( $row['meta'][$valueId] ) ? $row['meta'][$valueId] : (!empty( $row['content'][$valueId] ) ? $row['content'][$valueId] : '&nbsp;')).'</td>';
@@ -495,13 +498,14 @@ $pattern = '~(.+)(&&|\|\|)(.+)~';
 				}
 			}
 			$data[] = $dataString;
+			$dataHash[] = $dataRow;
 		}
 	}
 
 	if( count( $data ) > 0 ) {
 		switch( $pFormat ) {
 			case 'csv':
-				$ret = array_merge( array( $columns ), $data );
+				$ret = array_merge( array( $columns ), $dataHash );
 				break;
 			default:
 				$ret = '<table class="table"><tr><th>'.implode( '</th><th class="bitbar">', $columns ).'</th></tr><tr>' . implode( "</tr><tr>", $data ) . '</tr></table>';
